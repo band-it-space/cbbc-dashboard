@@ -14,6 +14,11 @@ export default function FiltersPanel() {
     setLocalFilters((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleNumberChange = (field: keyof typeof filters, value: string) => {
+    const number = parseFloat(value);
+    handleChange(field, Number.isNaN(number) ? null : number);
+  };
+
   const handleSearch = () => {
     setFilters(localFilters);
     refetch();
@@ -23,9 +28,9 @@ export default function FiltersPanel() {
     <div
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 rounded shadow"
       style={{
-        backgroundColor: "#f9fafb", // светло-серый фон
-        border: "1px solid #d1d5db", // сероватая рамка
-        color: "#111827", // основной текст
+        backgroundColor: "#f9fafb",
+        border: "1px solid #d1d5db",
+        color: "#111827",
       }}
     >
       <input
@@ -52,22 +57,19 @@ export default function FiltersPanel() {
         }}
       />
 
-      <select
-        value={localFilters.range || 200}
-        onChange={(e) => handleChange("range", parseInt(e.target.value))}
+      <input
+        type="number"
+        placeholder="Range (pts)"
+        value={localFilters.range ?? ""}
+        onChange={(e) => handleNumberChange("range", e.target.value)}
         className="px-3 py-2 rounded"
+        min={0}
         style={{
           backgroundColor: "#ffffff",
           border: "1px solid rgb(29 58 138)",
           color: "#1f2937",
         }}
-      >
-        {[50, 100, 200, 500].map((r) => (
-          <option key={r} value={r}>
-            {r} pts
-          </option>
-        ))}
-      </select>
+      />
 
       <input
         type="text"
@@ -86,8 +88,9 @@ export default function FiltersPanel() {
         type="number"
         placeholder="Price"
         value={localFilters.price ?? ""}
-        onChange={(e) => handleChange("price", parseFloat(e.target.value))}
+        onChange={(e) => handleNumberChange("price", e.target.value)}
         className="px-3 py-2 rounded"
+        min={0}
         style={{
           backgroundColor: "#ffffff",
           border: "1px solid rgb(29 58 138)",
@@ -100,7 +103,7 @@ export default function FiltersPanel() {
         disabled={isFetching}
         className="col-span-full md:col-span-1 font-semibold px-4 py-2 rounded transition flex items-center justify-center"
         style={{
-          backgroundColor: isFetching ? "#93C5FD" : "#1E3A8A", // более глубокий синий
+          backgroundColor: isFetching ? "#93C5FD" : "#1E3A8A",
           color: "#ffffff",
           cursor: isFetching ? "not-allowed" : "pointer",
           opacity: isFetching ? 0.7 : 1,
