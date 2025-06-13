@@ -25,11 +25,16 @@ export const useCBBCQuery = () => {
   const query = useQuery({
     queryKey: ["cbbc-data", filters],
     queryFn: () => fetchCBBC(filters),
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
     if (query.data) setData(query.data);
   }, [query.data, setData]);
 
-  return query;
+  return {
+    ...query,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
+  };
 };

@@ -4,9 +4,15 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="w-full max-w-screen-2xl mx-auto py-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-blue-700">
+    <header
+      className="shadow-sm"
+      style={{
+        backgroundColor: "#ffffff", // белый фон
+        borderBottom: "1px solid #E5E7EB", // border-border (gray-200)
+      }}
+    >
+      <div className="w-full max-w-screen-2xl mx-auto py-6 flex items-center justify-between px-6">
+        <h1 style={{ color: "#1E40AF" }} className="text-xl font-semibold">
           <Link href="/" className="hover:underline">
             CBBC Dashboard
           </Link>
@@ -14,16 +20,20 @@ export default function Header() {
         <nav className="space-x-4">
           <Link
             href="/dashboard"
-            className="text-gray-700 hover:text-blue-600 font-medium transition"
+            className="font-medium transition hover:underline"
+            style={{
+              color: "#4B5563", // muted
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563EB"; // secondary (hover)
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#4B5563";
+            }}
           >
             Dashboard
           </Link>
-          {/* <Link
-            href="/search"
-            className="text-gray-700 hover:text-blue-600 font-medium transition"
-          >
-            Search
-          </Link> */}
+          {/* Добавь дополнительные ссылки по мере необходимости */}
         </nav>
       </div>
     </header>

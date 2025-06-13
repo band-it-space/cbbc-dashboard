@@ -30,7 +30,9 @@ const columnHelper = createColumnHelper<CBBCRow>();
 const columns = [
   columnHelper.accessor("code", {
     header: () => "Code",
-    cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+    cell: (info) => (
+      <span style={{ fontFamily: "monospace" }}>{info.getValue()}</span>
+    ),
   }),
   columnHelper.accessor("issuer", {
     header: () => "Issuer",
@@ -80,16 +82,34 @@ export default function CBBCMetricsTable() {
   });
 
   return (
-    <div className="bg-white shadow rounded p-4 overflow-x-auto">
-      <table className="min-w-full text-sm text-center border border-gray-200">
-        <thead className="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+    <div
+      className="shadow rounded p-4 overflow-x-auto"
+      style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }} // white bg + gray-200 border
+    >
+      <table
+        className="min-w-full text-sm text-center"
+        style={{ borderCollapse: "collapse", width: "100%" }}
+      >
+        <thead
+          style={{
+            backgroundColor: "rgb(30, 58, 138)", // light hover background
+            color: "white", // heading color
+            fontWeight: 600,
+            textTransform: "uppercase",
+            fontSize: "0.75rem",
+          }}
+        >
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-3 py-2 border-b cursor-pointer select-none"
                   onClick={header.column.getToggleSortingHandler()}
+                  style={{
+                    padding: "0.5rem 0.75rem",
+                    borderBottom: "1px solid #e5e7eb",
+                    cursor: "pointer",
+                  }}
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -105,21 +125,45 @@ export default function CBBCMetricsTable() {
             </tr>
           ))}
         </thead>
-        <tbody className="divide-y divide-gray-100 text-gray-800">
+        <tbody style={{ color: "#1f2937" }}>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-6 text-gray-400"
+                style={{
+                  textAlign: "center",
+                  padding: "2rem",
+                  color: "#9ca3af", // muted
+                }}
               >
                 No data found
               </td>
             </tr>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50">
+              <tr
+                key={row.id}
+                style={{
+                  backgroundColor: "white",
+                  borderBottom: "1px solid #b3b3b3", // один бордер на всю строку
+                  transition: "background-color 0.2s ease-in-out",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor =
+                    "#e5e7eb"; // gray-200
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.backgroundColor =
+                    "white";
+                }}
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2">
+                  <td
+                    key={cell.id}
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                    }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
