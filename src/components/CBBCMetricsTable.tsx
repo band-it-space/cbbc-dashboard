@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  createColumnHelper,
+  useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable,
   flexRender,
+  createColumnHelper,
+  type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { useCBBCQuery } from "@/hooks/useCBBCQuery";
@@ -67,7 +68,7 @@ const columns = [
 export default function CBBCMetricsTable() {
   useCBBCQuery();
   const { data } = useCBBCStore();
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
