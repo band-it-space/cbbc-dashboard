@@ -26,7 +26,6 @@ export const useCBBCQuery = () => {
   const query = useQuery({
     queryKey: ["cbbc-data", filters],
     queryFn: () => fetchCBBC(filters),
-    keepPreviousData: true,
   });
 
   useEffect(() => {
