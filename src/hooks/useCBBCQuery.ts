@@ -31,7 +31,7 @@ export const useCBBCQuery = () => {
 
   useEffect(() => {
     if (query.data) setData(query.data);
-  }, [query.data]);
+  }, [query.data, setData]);
 
   return query;
 };
