@@ -13,9 +13,8 @@ async function fetchCBBC(filters: any) {
   if (code) params.append("code", code);
   if (price) params.append("price", price.toString());
 
-  const res = await fetch(
-    `http://35.176.35.137:8000/metrics/cbbc/?${params.toString()}`
-  );
+  const res = await fetch(`/api/cbbc?${params.toString()}`);
+
   if (!res.ok) throw new Error("Failed to fetch data");
   return res.json();
 }
