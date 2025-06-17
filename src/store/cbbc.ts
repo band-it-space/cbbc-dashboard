@@ -1,29 +1,26 @@
 import { create } from "zustand";
-
-interface Filters {
-  from: string;
-  to: string;
-  range: number;
-  code?: string;
-  price?: number;
-  issuer?: string;
-}
-
-interface CBBCStore {
-  filters: Filters;
-  setFilters: (update: Partial<Filters>) => void;
-  data: any[];
-  setData: (data: any[]) => void;
-}
+import { CBBCStore } from "./types";
 
 export const useCBBCStore = create<CBBCStore>((set) => ({
   filters: {
-    from: "2025-06-11",
-    to: new Date().toISOString().slice(0, 10),
+    date: "2025-06-11",
     range: 200,
+    grouping: true,
   },
   setFilters: (update) =>
     set((state) => ({ filters: { ...state.filters, ...update } })),
-  data: [],
-  setData: (data) => set({ data }),
+
+  rawData: [],
+  setRawData: (data) => set({ rawData: data }),
+
+  bullGroups: [],
+  bearGroups: [],
+  setGroupedData: (bull, bear) => set({ bullGroups: bull, bearGroups: bear }),
+
+  groupedMap: {},
+  setGroupedMap: (map) => set({ groupedMap: map }),
+
+  underlyings: [],
+  issuers: [],
+  setMetaOptions: (underlyings, issuers) => set({ underlyings, issuers }),
 }));
