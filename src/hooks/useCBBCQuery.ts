@@ -1,17 +1,23 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCBBCStore } from "@/store/cbbc";
+import type { Filters } from "@/store/types";
+import type { CBBCItem } from "@/store/types";
 
-async function fetchCBBC(filters: any) {
-  const { from, to, range, issuer, code, price } = filters;
+// Исправляем сигнатуру и типизацию фильтров
+async function fetchCBBC(filters: Filters): Promise<CBBCItem[]> {
+  const { date: from, range, issuer, code, price } = filters;
   const params = new URLSearchParams();
 
   if (from) params.append("from_date", from);
-  if (to) params.append("to_date", to);
-  if (range) params.append("range", range.toString());
-  if (issuer && issuer !== "All") params.append("issuer", issuer);
+  if (range !== undefined) params.append("range", range.toString());
+
+  if (issuer && issuer.length > 0) {
+    params.append("issuer", issuer.join(",")); // 🧠 массив -> строка
+  }
+
   if (code) params.append("code", code);
-  if (price) params.append("price", price.toString());
+  if (price !== undefined) params.append("price", price.toString());
 
   const res = await fetch(`/api/cbbc?${params.toString()}`);
 
@@ -20,17 +26,31 @@ async function fetchCBBC(filters: any) {
 }
 
 export const useCBBCQuery = () => {
-  const { filters, setData } = useCBBCStore();
+  const { filters, setRawData, setMetaOptions } = useCBBCStore();
+  const hasMounted = useRef(false);
 
-  const query = useQuery({
+  const query = useQuery<CBBCItem[], Error>({
     queryKey: ["cbbc-data", filters],
     queryFn: () => fetchCBBC(filters),
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    if (query.data) setData(query.data);
-  }, [query.data, setData]);
+    if (query.data && hasMounted.current) {
+      setRawData(query.data);
+
+      const uniqueIssuers = [...new Set(query.data.map((item) => item.issuer))];
+      const uniqueUnderlyings = [
+        ...new Set(query.data.map((item) => item.underlying)),
+      ];
+
+      setMetaOptions(uniqueUnderlyings, uniqueIssuers);
+    }
+  }, [query.data, setRawData, setMetaOptions]);
+
+  useEffect(() => {
+    hasMounted.current = true;
+  }, []);
 
   return {
     ...query,

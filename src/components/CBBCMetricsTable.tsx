@@ -70,6 +70,8 @@ const columns = [
 export default function CBBCMetricsTable() {
   useCBBCQuery();
   const { data } = useCBBCStore();
+
+  console.log("💡 CBBC Response Data:", data); // ← ВЫВОД ДАННЫХ В КОНСОЛЬ
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
