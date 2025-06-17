@@ -69,9 +69,8 @@ const columns = [
 
 export default function CBBCMetricsTable() {
   useCBBCQuery();
-  const { data } = useCBBCStore();
+  const { rawData: data } = useCBBCStore();
 
-  console.log("💡 CBBC Response Data:", data); // ← ВЫВОД ДАННЫХ В КОНСОЛЬ
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -86,7 +85,7 @@ export default function CBBCMetricsTable() {
   return (
     <div
       className="shadow rounded p-4 overflow-x-auto"
-      style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }} // white bg + gray-200 border
+      style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}
     >
       <table
         className="min-w-full text-sm text-center"
