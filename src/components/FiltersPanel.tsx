@@ -11,45 +11,93 @@ const Select = dynamic<SelectProps<any, true>>(
 
 type SelectOption = { value: string; label: string };
 
-const groupOptions = [100, 200, 500]; // убираем null, чтобы не мешал типизации
-
 export default function FiltersPanel({
   filters,
   issuers,
   underlyings,
+  setLocalFilters,
   onChange,
+  handleRefresh,
+  handleFilterReset,
 }: {
   filters: Filters;
   issuers: string[];
   underlyings: string[];
+  setLocalFilters: (update: Filters) => void;
   onChange: (field: keyof Filters, value: any) => void;
+  handleRefresh: () => void;
+  handleFilterReset: () => void;
 }) {
   const issuerOptions: SelectOption[] = issuers.map((issuer) => ({
     value: issuer,
     label: issuer,
   }));
 
-  const handleNumberChange = (field: keyof Filters, value: string) => {
-    const number = parseFloat(value);
-    onChange(field, Number.isNaN(number) ? null : number);
-  };
-
   return (
     <div className="bg-white border border-gray-200 shadow rounded p-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Date</label>
+          <label className="block text-sm text-gray-600 mb-1 flex items-center">
+            From Date
+            <span
+              title="Start of the date range"
+              className="ml-1 text-blue-500 cursor-help"
+            >
+              ℹ
+            </span>
+          </label>
           <input
             type="date"
-            value={filters.date || ""}
-            onChange={(e) => onChange("date", e.target.value)}
+            value={filters.from || ""}
+            onChange={(e) =>
+              setLocalFilters({ ...filters, from: e.target.value })
+            }
             className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 mb-1">
+          <label className="block text-sm text-gray-600 mb-1 flex items-center">
+            To Date
+            <span
+              title="End of the date range"
+              className="ml-1 text-blue-500 cursor-help"
+            >
+              ℹ
+            </span>
+          </label>
+          <input
+            type="date"
+            value={filters.to || ""}
+            onChange={(e) =>
+              setLocalFilters({ ...filters, to: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
+          />
+        </div>
+
+        <div className="flex items-end">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            onClick={handleRefresh}
+            disabled={!filters.from || !filters.to}
+          >
+            Apply Date Range
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        {/* Underlying */}
+        <div>
+          <label className="block text-sm text-gray-600 mb-1 flex items-center">
             Underlying Asset
+            <span
+              title="Filter by underlying stock code"
+              className="ml-1 text-blue-500 cursor-help"
+            >
+              ℹ
+            </span>
           </label>
           <select
             value={filters.underlying || ""}
@@ -65,24 +113,53 @@ export default function FiltersPanel({
           </select>
         </div>
 
+        {/* Group Step */}
         <div>
-          <label className="block text-sm text-gray-600 mb-1">
-            Range +/- (pts)
+          <label className="block text-sm text-gray-600 mb-1 flex items-center">
+            Group Step
+            <span
+              title="Set custom grouping step for KO levels"
+              className="ml-1 text-blue-500 cursor-help"
+            >
+              ℹ
+            </span>
           </label>
-          <input
-            type="number"
-            placeholder="e.g. 200"
-            value={filters.range ?? ""}
-            onChange={(e) => handleNumberChange("range", e.target.value)}
-            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
-            min={0}
-          />
+          <div className="flex items-center gap-2">
+            <button
+              className="px-2 py-1 bg-gray-200 rounded"
+              onClick={() => onChange("groupBy", (filters.groupBy || 0) - 1)}
+            >
+              -
+            </button>
+            <input
+              type="number"
+              min={0}
+              value={filters.groupBy ?? 0}
+              onChange={(e) =>
+                onChange("groupBy", parseFloat(e.target.value) || 0)
+              }
+              className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
+            />
+            <button
+              className="px-2 py-1 bg-gray-200 rounded"
+              onClick={() => onChange("groupBy", (filters.groupBy || 0) + 1)}
+            >
+              +
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        {/* Issuers */}
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Issuers</label>
+          <label className="block text-sm text-gray-600 mb-1 flex items-center">
+            Issuers
+            <span
+              title="Filter by issuer companies"
+              className="ml-1 text-blue-500 cursor-help"
+            >
+              ℹ
+            </span>
+          </label>
           <Select
             isMulti
             options={issuerOptions}
@@ -100,29 +177,17 @@ export default function FiltersPanel({
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">
-            Group KO Level By
-          </label>
-          <select
-            value={filters.groupBy?.toString() ?? ""}
-            onChange={(e) => {
-              const value =
-                e.target.value === "" ? null : parseInt(e.target.value);
-              onChange("groupBy", value);
+        {/* Reset Button */}
+        <div className="flex items-end">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            onClick={() => {
+              handleFilterReset();
             }}
-            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
           >
-            <option value="">No Grouping</option>
-            {groupOptions.map((val) => (
-              <option key={val} value={val}>
-                Group by {val}
-              </option>
-            ))}
-          </select>
+            Reset Filters
+          </button>
         </div>
-
-        <div className="flex items-end"></div>
       </div>
     </div>
   );

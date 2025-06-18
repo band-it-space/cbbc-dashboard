@@ -3,8 +3,9 @@ import { CBBCStore } from "./types";
 
 export const useCBBCStore = create<CBBCStore>((set) => ({
   filters: {
-    date: "2025-06-11",
-    range: 200,
+    from: "2025-06-11",
+    to: "2025-06-11",
+    range: 0,
     grouping: true,
   },
   setFilters: (update) =>

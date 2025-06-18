@@ -1,5 +1,6 @@
 export interface Filters {
-  date: string;
+  from?: string;
+  to?: string;
   underlying?: string;
   range?: number;
   issuer?: string[];
@@ -16,6 +17,7 @@ export interface GroupedCBBC {
   contracts: number;
   shares: number;
   direction: "Bull" | "Bear";
+  issuer?: string;
 }
 
 export type GroupedMap = Record<
@@ -47,8 +49,24 @@ export interface CBBCStore {
 export interface CBBCItem {
   code: string;
   issuer: string;
+  underlying: string;
+  bull_bear: "Bull" | "Bear";
+  cbbc_type: string;
+  cbbc_category: string;
   call_level: number;
+  strike_level: number;
+  currency: string;
+  strike_call_currency: string;
+  ul_currency: string;
+  ul_price: number;
+  day_high: number;
+  day_low: number;
+  closing_price: number;
+  turnover_000: number;
+  listing_date: string;
+  maturity_date: string;
+  divisor: number;
+  outstanding_quantity: number;
   calculated_notional: number;
   shares_number: number;
-  underlying: string;
 }
