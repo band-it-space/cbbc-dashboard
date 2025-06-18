@@ -193,10 +193,10 @@ export function useGroupedCBBC() {
               contracts: 0,
               shares: 0,
               direction,
+              issuer: item.issuer ?? "N/A",
               items: [],
             });
           }
-
           const group = map.get(key)!;
           group.notional += item.calculated_notional;
           group.contracts += item.outstanding_quantity;
@@ -231,7 +231,6 @@ export function useGroupedCBBC() {
     return { bullGroups, bearGroups, groupedMap };
   }, [rawData, issuer, underlying, price, range, groupBy]);
 
-  // ✅ фиксированный список зависимостей
   useEffect(() => {
     if (!groupBy) {
       setGroupedData([], []);

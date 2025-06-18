@@ -6,6 +6,7 @@ import FiltersPanel from "@/components/FiltersPanel";
 import { useCBBCQuery } from "@/hooks/useCBBCQuery";
 import { useCBBCStore } from "@/store/cbbc";
 import { useGroupedCBBC } from "@/hooks/useGroupedCBBC";
+import CBBCDashboardStats from "@/components/CBBCDashboardStats";
 
 export default function DashboardPage() {
   const { isFetching, refetch } = useCBBCQuery();
@@ -35,23 +36,36 @@ export default function DashboardPage() {
     }
   }, [bullGroups, bearGroups, setGroupedData]);
 
-  useEffect(() => {
-    if (localFilters.date !== filters.date) {
-      const resetFilters = {
-        date: localFilters.date,
-        underlying: undefined,
-        range: undefined,
-        issuer: [],
-        groupBy: null,
-      };
+  const handleRefresh = () => {
+    const resetFilters = {
+      from: localFilters.from,
+      to: localFilters.to,
+      underlying: undefined,
+      range: undefined,
+      issuer: [],
+      groupBy: null,
+    };
 
-      setLocalFilters(resetFilters);
-      setFilters(resetFilters);
+    setLocalFilters(resetFilters); // для UI
+    setFilters(resetFilters); // для store
+    setGroupedData([], []);
+    refetch();
+  };
 
-      setGroupedData([], []);
-      refetch();
-    }
-  }, [filters.date, localFilters.date, refetch, setFilters, setGroupedData]);
+  const handleFilterReset = () => {
+    const resetFilters = {
+      from: localFilters.from,
+      to: localFilters.to,
+      underlying: undefined,
+      range: undefined,
+      issuer: [],
+      groupBy: null,
+    };
+
+    setLocalFilters(resetFilters); // для UI
+    setFilters(resetFilters); // для store
+    setGroupedData([], []);
+  };
 
   const handleFilterChange = (field: string, value: any) => {
     const updated = {
@@ -68,43 +82,65 @@ export default function DashboardPage() {
 
   const isGrouped = localFilters.groupBy != null;
 
-  const rows = isGrouped
-    ? [
-        ...bearGroups.map((g) => ({
+  const rows = useMemo(() => {
+    if (isGrouped) {
+      return [
+        ...grouped.bearGroups.map((g) => ({
           groupKey: `Bear-${g.rangeStart}–${g.rangeEnd}`,
+          callLevel: g.rangeStart,
+          issuer: g.issuer ?? "N/A", // 👈 обязательно
           notional: g.notional,
           shares: g.shares,
           quantity: g.contracts,
+          direction: "Bear" as const,
+          sortKey: g.rangeStart,
+          rangeStart: g.rangeStart,
+          rangeEnd: g.rangeEnd,
         })),
-        ...bullGroups.map((g) => ({
+        ...grouped.bullGroups.map((g) => ({
           groupKey: `Bull-${g.rangeStart}–${g.rangeEnd}`,
+          callLevel: g.rangeStart,
+          issuer: g.issuer ?? "N/A", // 👈 обязательно
           notional: g.notional,
           shares: g.shares,
           quantity: g.contracts,
+          direction: "Bull" as const,
+          sortKey: g.rangeStart,
+          rangeStart: g.rangeStart,
+          rangeEnd: g.rangeEnd,
         })),
-      ]
-    : rawData
-        .filter((item) => {
-          const matchIssuer =
-            !localFilters.issuer?.length ||
-            localFilters.issuer.includes(item.issuer);
-          const matchUnderlying =
-            !localFilters.underlying ||
-            item.underlying === localFilters.underlying;
-          const matchRange =
-            localFilters.price == null ||
-            Math.abs(item.call_level - localFilters.price) <=
-              (localFilters.range || 200);
-          return matchIssuer && matchUnderlying && matchRange;
-        })
-        .map((item) => ({
-          groupKey: `${item.call_level} ${
-            item.bull_bear === "Bull" ? "(Bull)" : "(Bear)"
-          }`,
-          notional: item.calculated_notional,
-          shares: item.shares_number,
-          quantity: item.outstanding_quantity,
-        }));
+      ];
+    }
+
+    return rawData
+      .filter((item) => {
+        const matchIssuer =
+          !localFilters.issuer?.length ||
+          localFilters.issuer.includes(item.issuer);
+        const matchUnderlying =
+          !localFilters.underlying ||
+          item.underlying === localFilters.underlying;
+        const matchRange =
+          localFilters.price == null ||
+          Math.abs(item.call_level - localFilters.price) <=
+            (localFilters.range || 200);
+        return matchIssuer && matchUnderlying && matchRange;
+      })
+      .map((item) => ({
+        groupKey: `${item.call_level} ${
+          item.bull_bear === "Bull" ? "(Bull)" : "(Bear)"
+        }`,
+        callLevel: parseFloat(item.call_level),
+
+        notional: item.calculated_notional,
+        shares: item.shares_number,
+        quantity: item.outstanding_quantity,
+        issuer: item.issuer,
+        direction: item.bull_bear as "Bull" | "Bear",
+        rangeStart: item.rangeStart, // 👈 добавлено
+        rangeEnd: item.rangeEnd, // 👈 добавлено
+      }));
+  }, [isGrouped, grouped, rawData, localFilters]);
 
   return (
     <div className="p-6">
@@ -114,9 +150,13 @@ export default function DashboardPage() {
           filters={localFilters}
           issuers={issuers}
           underlyings={underlyings}
+          setLocalFilters={setLocalFilters}
           onChange={handleFilterChange}
+          handleRefresh={handleRefresh}
+          handleFilterReset={handleFilterReset}
         />
       </div>
+      <CBBCDashboardStats rows={rows} />
       <GroupedCBBCMetricsTable rows={rows} isFetching={isFetching} />
     </div>
   );
