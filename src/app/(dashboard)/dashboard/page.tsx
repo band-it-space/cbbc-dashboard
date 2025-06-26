@@ -1,163 +1,219 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import FiltersPanel from "@/components/FiltersPanel";
+// import CBBCDashboardStats from "@/components/CBBCDashboardStats";
+// import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
+// import { useGroupedCBBCQuery } from "@/hooks/useGroupedCBBCQuery";
+// import CBBCMatrixTable from "@/components/CBBCTable/GroupedCBBCMetricsMatrix";
+// import { useCBBCMatrixData } from "@/hooks/useCBBCMatrixData";
+
+// export default function DashboardPageV2() {
+//   const { filters, setFilters, groupedRawData } = useGroupedCBBCStore();
+//   console.log("groupedRawData", groupedRawData);
+
+//   const { isFetching, refetch } = useGroupedCBBCQuery();
+
+//   const [localFilters, setLocalFilters] = useState(filters);
+//   const [activeDate, setActiveDate] = useState<string>("");
+
+//   useEffect(() => {
+//     setLocalFilters(filters);
+//   }, [filters]);
+
+//   const handleRefresh = () => {
+//     const resetFilters = {
+//       from: localFilters.from,
+//       to: localFilters.to,
+//       underlying: undefined,
+//       range: 2,
+//       issuer: undefined,
+//     };
+
+//     setLocalFilters(resetFilters);
+//     setFilters(resetFilters);
+//     refetch();
+//   };
+
+//   const handleFilterReset = () => {
+//     const resetFilters = {
+//       from: localFilters.from,
+//       to: localFilters.to,
+//       underlying: undefined,
+//       range: 2,
+//       issuer: undefined,
+//     };
+
+//     setLocalFilters(resetFilters);
+//     setFilters(resetFilters);
+//   };
+
+//   const handleFilterChange = (field: string, value: any) => {
+//     const updated = {
+//       ...localFilters,
+//       [field]: value,
+//     };
+
+//     setLocalFilters(updated);
+//     if (field !== "date") {
+//       setFilters(updated);
+//     }
+//   };
+
+//   const { matrix, rangeList, dateList, bullMatrix, bearMatrix, priceByDate } =
+//     useCBBCMatrixData(activeDate);
+//   useEffect(() => {
+//     if (dateList.length > 0 && !activeDate) {
+//       setActiveDate(dateList[0]);
+//     }
+//   }, [dateList, activeDate]);
+
+//   return (
+//     <div className="p-6">
+//       <h1 className="text-2xl font-bold mb-4">CBBC Dashboard</h1>
+
+//       <div className="mb-4">
+//         <FiltersPanel
+//           filters={localFilters}
+//           issuers={[]}
+//           underlyings={[]}
+//           setLocalFilters={setLocalFilters}
+//           onChange={handleFilterChange}
+//           handleRefresh={handleRefresh}
+//           handleFilterReset={handleFilterReset}
+//         />
+//       </div>
+
+//       <CBBCDashboardStats rows={groupedRawData} />
+
+//       {groupedRawData.length > 0 && activeDate ? (
+//         <CBBCMatrixTable
+//           rangeList={rangeList}
+//           dateList={dateList}
+//           activeDate={activeDate}
+//           onChangeActiveDate={setActiveDate}
+//           matrix={matrix}
+//           bullMatrix={bullMatrix}
+//           bearMatrix={bearMatrix}
+//           priceByDate={priceByDate}
+//         />
+//       ) : isFetching && groupedRawData.length === 0 ? (
+//         <div className="mt-6 animate-pulse space-y-4">
+//           <div className="h-8 bg-gray-200 rounded w-1/3" />
+//           <div className="h-6 bg-gray-200 rounded w-full" />
+//           <div className="h-6 bg-gray-200 rounded w-5/6" />
+//           <div className="h-6 bg-gray-200 rounded w-2/3" />
+//           <div className="h-6 bg-gray-200 rounded w-3/4" />
+//         </div>
+//       ) : null}
+//     </div>
+//   );
+// }
+
+// app/dashboard/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import GroupedCBBCMetricsTable from "@/components/CBBCGroupedTable";
 import FiltersPanel from "@/components/FiltersPanel";
-import { useCBBCQuery } from "@/hooks/useCBBCQuery";
-import { useCBBCStore } from "@/store/cbbc";
-import { useGroupedCBBC } from "@/hooks/useGroupedCBBC";
 import CBBCDashboardStats from "@/components/CBBCDashboardStats";
+import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
+import { useGroupedCBBCQuery } from "@/hooks/useGroupedCBBCQuery";
+import CBBCMatrixTable from "@/components/CBBCTable/GroupedCBBCMetricsMatrix";
+import { useCBBCMatrixData } from "@/hooks/useCBBCMatrixData";
+import { useUnderlyingsQuery } from "@/hooks/useUnderlyingsQuery";
+import { Filters } from "@/store/groupedCBBCTypes";
 
-export default function DashboardPage() {
-  const { isFetching, refetch } = useCBBCQuery();
-  const { filters, setFilters, underlyings, issuers, rawData, setGroupedData } =
-    useCBBCStore();
-
-  const grouped = useGroupedCBBC();
-
-  const bullGroups = useMemo(
-    () => grouped?.bullGroups ?? [],
-    [grouped?.bullGroups]
-  );
-  const bearGroups = useMemo(
-    () => grouped?.bearGroups ?? [],
-    [grouped?.bearGroups]
-  );
+export default function DashboardPageV2() {
+  const { filters, setFilters, groupedRawData, issuers } =
+    useGroupedCBBCStore();
+  const { data: underlyings = [] } = useUnderlyingsQuery();
+  const { isFetching, refetch } = useGroupedCBBCQuery();
 
   const [localFilters, setLocalFilters] = useState(filters);
+  const [activeDate, setActiveDate] = useState<string>("");
 
+  // Синхронизируем локальные фильтры при изменении глобальных
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters]);
 
+  const handleApplyFilters = async () => {
+    // Обновляем фильтры в хранилище
+    setFilters(localFilters);
+    // Ждем следующего тика, чтобы React успел обновить хранилище
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await refetch();
+  };
+
+  const { rangeList, dateList, bullMatrix, bearMatrix, priceByDate } =
+    useCBBCMatrixData(activeDate);
+
   useEffect(() => {
-    if (bullGroups.length > 0 || bearGroups.length > 0) {
-      setGroupedData(bullGroups, bearGroups);
+    if (dateList.length > 0 && !activeDate) {
+      setActiveDate(dateList[0]);
     }
-  }, [bullGroups, bearGroups, setGroupedData]);
+  }, [dateList, activeDate]);
 
-  const handleRefresh = () => {
-    const resetFilters = {
-      from: localFilters.from,
-      to: localFilters.to,
-      underlying: undefined,
-      range: undefined,
-      issuer: [],
-      groupBy: null,
-    };
+  const issuerOptions = useMemo(
+    () =>
+      issuers.map((issuer) => ({
+        label: issuer,
+        value: issuer,
+      })),
+    [issuers]
+  );
 
-    setLocalFilters(resetFilters); // для UI
-    setFilters(resetFilters); // для store
-    setGroupedData([], []);
-    refetch();
+  const handleIssuerChange = (newValues: string[]) => {
+    setFilters({ issuers: newValues });
   };
-
-  const handleFilterReset = () => {
-    const resetFilters = {
-      from: localFilters.from,
-      to: localFilters.to,
-      underlying: undefined,
-      range: undefined,
-      issuer: [],
-      groupBy: null,
-    };
-
-    setLocalFilters(resetFilters); // для UI
-    setFilters(resetFilters); // для store
-    setGroupedData([], []);
-  };
-
-  const handleFilterChange = (field: string, value: any) => {
-    const updated = {
-      ...localFilters,
-      [field]: value,
-    };
-
-    setLocalFilters(updated);
-
-    if (field !== "date") {
-      setFilters(updated);
-    }
-  };
-
-  const isGrouped = localFilters.groupBy != null;
-
-  const rows = useMemo(() => {
-    if (isGrouped) {
-      return [
-        ...grouped.bearGroups.map((g) => ({
-          groupKey: `Bear-${g.rangeStart}–${g.rangeEnd}`,
-          callLevel: g.rangeStart,
-          issuer: g.issuer ?? "N/A", // 👈 обязательно
-          notional: g.notional,
-          shares: g.shares,
-          quantity: g.contracts,
-          direction: "Bear" as const,
-          sortKey: g.rangeStart,
-          rangeStart: g.rangeStart,
-          rangeEnd: g.rangeEnd,
-        })),
-        ...grouped.bullGroups.map((g) => ({
-          groupKey: `Bull-${g.rangeStart}–${g.rangeEnd}`,
-          callLevel: g.rangeStart,
-          issuer: g.issuer ?? "N/A", // 👈 обязательно
-          notional: g.notional,
-          shares: g.shares,
-          quantity: g.contracts,
-          direction: "Bull" as const,
-          sortKey: g.rangeStart,
-          rangeStart: g.rangeStart,
-          rangeEnd: g.rangeEnd,
-        })),
-      ];
-    }
-
-    return rawData
-      .filter((item) => {
-        const matchIssuer =
-          !localFilters.issuer?.length ||
-          localFilters.issuer.includes(item.issuer);
-        const matchUnderlying =
-          !localFilters.underlying ||
-          item.underlying === localFilters.underlying;
-        const matchRange =
-          localFilters.price == null ||
-          Math.abs(item.call_level - localFilters.price) <=
-            (localFilters.range || 200);
-        return matchIssuer && matchUnderlying && matchRange;
-      })
-      .map((item) => ({
-        groupKey: `${item.call_level} ${
-          item.bull_bear === "Bull" ? "(Bull)" : "(Bear)"
-        }`,
-        callLevel: parseFloat(item.call_level),
-
-        notional: item.calculated_notional,
-        shares: item.shares_number,
-        quantity: item.outstanding_quantity,
-        issuer: item.issuer,
-        direction: item.bull_bear as "Bull" | "Bear",
-        rangeStart: item.rangeStart, // 👈 добавлено
-        rangeEnd: item.rangeEnd, // 👈 добавлено
-      }));
-  }, [isGrouped, grouped, rawData, localFilters]);
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">CBBC Dashboard</h1>
+
       <div className="mb-4">
         <FiltersPanel
           filters={localFilters}
-          issuers={issuers}
           underlyings={underlyings}
-          setLocalFilters={setLocalFilters}
-          onChange={handleFilterChange}
-          handleRefresh={handleRefresh}
-          handleFilterReset={handleFilterReset}
+          setLocalFilters={(update: Partial<Filters>) =>
+            setLocalFilters((prev) => ({ ...prev, ...update }))
+          }
+          onApply={handleApplyFilters}
+          // onReset={handleFilterReset}
         />
       </div>
-      <CBBCDashboardStats rows={rows} />
-      <GroupedCBBCMetricsTable rows={rows} isFetching={isFetching} />
+
+      <CBBCDashboardStats
+        from={filters.from}
+        to={filters.to}
+        issuerOptions={issuerOptions}
+        selectedIssuers={filters.issuers || []}
+        onIssuerChange={handleIssuerChange}
+      />
+
+      {isFetching ? (
+        <div className="mt-6 animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3" />
+          <div className="h-6 bg-gray-200 rounded w-full" />
+          <div className="h-6 bg-gray-200 rounded w-5/6" />
+          <div className="h-6 bg-gray-200 rounded w-2/3" />
+          <div className="h-6 bg-gray-200 rounded w-3/4" />
+        </div>
+      ) : !isFetching && groupedRawData.length > 0 && activeDate ? (
+        <CBBCMatrixTable
+          rangeList={rangeList}
+          dateList={dateList}
+          activeDate={activeDate}
+          onChangeActiveDate={setActiveDate}
+          bullMatrix={bullMatrix}
+          bearMatrix={bearMatrix}
+          priceByDate={priceByDate}
+        />
+      ) : (
+        <div className="mt-6 text-center text-gray-500">
+          No data found for the selected criteria.
+        </div>
+      )}
     </div>
   );
 }
