@@ -5,10 +5,15 @@ export async function GET(req: NextRequest) {
   const query = url.searchParams.toString();
 
   const res = await fetch(
-    `http://13.49.78.35:8000/metrics/cbbc/metrics/cbbc/aggregate?${query}`
+    `http://51.20.215.176:8000/metrics/cbbc/aggregate?${query}`
   );
-  const data = await res.json();
+  if (!res.ok) {
+    return new Response("Failed to fetch aggregated data", {
+      status: res.status,
+    });
+  }
 
+  const data = await res.json();
   return new Response(JSON.stringify(data), {
     headers: { "Content-Type": "application/json" },
   });
