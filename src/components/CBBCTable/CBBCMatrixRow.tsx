@@ -108,7 +108,7 @@ export default function CBBCMatrixRow({
                 <td className="relative p-1  border-1 border-blue-600 min-w-[100px] text-center bg-blue-50">
                   <div
                     className={`h-4 ${
-                      bearFirst ? "bg-green-600" : "bg-gray-300"
+                      bearFirst ? "bg-red-600" : "bg-green-600"
                     }`}
                     style={{
                       width: `${(cell.notional / maxNotional) * 100}%`,
@@ -121,7 +121,7 @@ export default function CBBCMatrixRow({
                 <td className="relative p-1  border-1 border-blue-600 min-w-[100px] text-center bg-blue-50">
                   <div
                     className={`h-4 ${
-                      bullFirst ? "bg-red-600" : "bg-gray-300"
+                      bullFirst ? "bg-gray-300" : "bg-gray-300"
                     }`}
                     style={{
                       width: `${(cell.quantity / maxQuantity) * 100}%`,
@@ -154,6 +154,16 @@ export default function CBBCMatrixRow({
         <tr className="border-t bg-gray-100">
           <td colSpan={1 + dateList.length * 3} className="p-2">
             <div className="flex flex-col gap-1">
+              <div className="flex justify-start">
+                <button
+                  onClick={() => onToggle(range)}
+                  className="text-xs text-gray-500 hover:text-red-600 px-2 py-1"
+                  title="Collapse"
+                >
+                  ✕
+                </button>
+              </div>
+
               {matrix[range][activeDate].items.map((item) => (
                 <Link
                   key={item.code}
