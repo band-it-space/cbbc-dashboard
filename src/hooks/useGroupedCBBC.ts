@@ -142,12 +142,14 @@
 //   };
 // }
 
-import { useCBBCStore } from "@/store/cbbc";
+import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
+
 import { GroupedCBBC } from "@/store/types";
 import { useEffect, useMemo } from "react";
 
 export function useGroupedCBBC() {
-  const { rawData, filters, setGroupedData, setGroupedMap } = useCBBCStore();
+  const { rawData, filters, setGroupedData, setGroupedMap } =
+    useGroupedCBBCStore();
   const { groupBy, price, issuer, underlying } = filters;
 
   const range = groupBy ?? 0;

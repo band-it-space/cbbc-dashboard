@@ -1,3 +1,5 @@
+import { Underlying } from "@/components/FiltersPanel";
+
 export interface Filters {
   from?: string;
   to?: string;
@@ -43,7 +45,7 @@ export interface CBBCStore {
 
   underlyings: string[];
   issuers: string[];
-  setMetaOptions: (underlyings: string[], issuers: string[]) => void;
+  setMetaOptions: (underlyings: Underlying[], issuers: string[]) => void; // ✅ ИСПРАВЛЕНО
 }
 
 export interface CBBCItem {

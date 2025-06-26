@@ -1,11 +1,11 @@
 "use client";
 
-import { useCBBCStore } from "@/store/cbbc";
+import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import BBCDetailTable from "@/components/BBCDetailTable";
 
 export default function GroupClient({ groupKey }: { groupKey: string }) {
   const rawKey = decodeURIComponent(groupKey);
-  const { groupedMap, rawData } = useCBBCStore();
+  const { groupedMap, rawData } = useGroupedCBBCStore();
 
   if (Object.keys(groupedMap).length === 0 && rawData.length === 0) {
     return <p className="text-gray-500 p-4">Loading data...</p>;
