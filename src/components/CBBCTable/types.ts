@@ -1,4 +1,3 @@
-// types.ts
 export type CBBCItem = {
   code: string;
   level: number;
