@@ -19,21 +19,20 @@ type CBBCItem = {
 
 export default function CBBCCodePage() {
   const { code } = useParams();
-  const { groupedRawData, hasFetchedOnce } = useGroupedCBBCStore();
+  const { groupedRawData } = useGroupedCBBCStore();
 
   const router = useRouter();
 
   const results = useMemo(() => {
     if (!code || !groupedRawData.length) return [];
 
-    return groupedRawData.flatMap(
-      (row) =>
-        row.cbcc_list
-          ?.filter((item) => String(item.code) === String(code))
-          .map((item) => ({
-            ...item,
-            date: row.date,
-          })) || []
+    return groupedRawData.flatMap((row) =>
+      row.cbcc_list
+        ?.filter((item: CBBCItem) => String(item.code) === String(code))
+        .map((item: CBBCItem) => ({
+          ...item,
+          date: row.date,
+        }))
     );
   }, [groupedRawData, code]);
 
