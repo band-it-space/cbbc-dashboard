@@ -33,7 +33,7 @@ export default function DashboardPageV2() {
     useCBBCMatrixData(activeDate);
 
   useEffect(() => {
-    if (dateList.length > 0 && !activeDate) {
+    if (dateList.length > 0 && dateList[0] !== activeDate) {
       setActiveDate(dateList[0]);
     }
   }, [dateList, activeDate]);
