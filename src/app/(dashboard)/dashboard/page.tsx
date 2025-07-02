@@ -16,27 +16,87 @@ export default function DashboardPageV2() {
   const { data: underlyings = [] } = useUnderlyingsQuery();
   const { isFetching, refetch } = useGroupedCBBCQuery();
 
-  const [localFilters, setLocalFilters] = useState(filters);
-  const [activeDate, setActiveDate] = useState<string>("");
+  function getYesterday() {
+    const today = new Date();
+    const y = new Date(today);
+    y.setDate(today.getDate() - 1);
+    return y.toISOString().slice(0, 10);
+  }
+  function getFrom(dateStr: string) {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() - 2);
+    return d.toISOString().slice(0, 10);
+  }
 
   useEffect(() => {
-    setLocalFilters(filters);
+    if (!filters.to) {
+      const to = getYesterday();
+      const from = getFrom(to);
+      setFilters({ to, from });
+    }
+  }, [filters.to, setFilters]);
+
+  const [localFilters, setLocalFilters] = useState<Filters>({
+    ...filters,
+    date: filters.to,
+  });
+  const [activeDate, setActiveDate] = useState<string>("");
+  const [hasInitializedDate, setHasInitializedDate] = useState(false);
+
+  const handleDateChange = (dateStr: string) => {
+    setLocalFilters((prev) => ({ ...prev, date: dateStr }));
+  };
+
+  useEffect(() => {
+    setLocalFilters((prev) => ({ ...prev, ...filters, date: filters.to }));
+    setHasInitializedDate(false);
   }, [filters]);
 
   const handleApplyFilters = async () => {
-    setFilters(localFilters);
+    let to = localFilters.date;
+    let from = localFilters.date;
+    if (localFilters.date) {
+      const end = new Date(localFilters.date);
+      const start = new Date(end);
+      start.setDate(end.getDate() - 2);
+      from = start.toISOString().slice(0, 10);
+      to = end.toISOString().slice(0, 10);
+    }
+    setFilters({ ...filters, to, from });
     await new Promise((resolve) => setTimeout(resolve, 0));
     await refetch();
   };
 
-  const { rangeList, dateList, bullMatrix, bearMatrix, priceByDate } =
-    useCBBCMatrixData(activeDate);
+  const {
+    rangeList,
+    dateList: allDates,
+    bullMatrix,
+    bearMatrix,
+    priceByDate,
+  } = useCBBCMatrixData(activeDate);
+
+  const displayDateList = useMemo(() => {
+    if (!activeDate) return [];
+    const idx = allDates.indexOf(activeDate);
+    if (idx === -1) return [];
+    const prevDates = allDates.slice(Math.max(0, idx - 2), idx + 1).reverse();
+    return [activeDate, ...prevDates];
+  }, [activeDate, allDates]);
 
   useEffect(() => {
-    if (dateList.length > 0 && dateList[0] !== activeDate) {
-      setActiveDate(dateList[0]);
+    if (!hasInitializedDate && allDates.length > 0) {
+      setActiveDate(allDates[0]);
+      setHasInitializedDate(true);
     }
-  }, [dateList, activeDate]);
+  }, [allDates, hasInitializedDate]);
+
+  useEffect(() => {
+    if (localFilters.date && allDates.includes(localFilters.date)) {
+      setActiveDate(localFilters.date);
+    } else if (localFilters.date && allDates.length > 0) {
+      setActiveDate("");
+    }
+  }, [localFilters.date, allDates]);
 
   const issuerOptions = useMemo(
     () =>
@@ -59,11 +119,11 @@ export default function DashboardPageV2() {
         <FiltersPanel
           filters={localFilters}
           underlyings={underlyings}
-          setLocalFilters={(update: Partial<Filters>) =>
-            setLocalFilters((prev) => ({ ...prev, ...update }))
-          }
+          setLocalFilters={(update: Partial<Filters>) => {
+            if (update.date) handleDateChange(update.date as string);
+            else setLocalFilters((prev) => ({ ...prev, ...update }));
+          }}
           onApply={handleApplyFilters}
-          // onReset={handleFilterReset}
         />
       </div>
 
@@ -86,9 +146,8 @@ export default function DashboardPageV2() {
       ) : !isFetching && groupedRawData.length > 0 && activeDate ? (
         <CBBCMatrixTable
           rangeList={rangeList}
-          dateList={dateList}
+          dateList={displayDateList}
           activeDate={activeDate}
-          onChangeActiveDate={setActiveDate}
           bullMatrix={bullMatrix}
           bearMatrix={bearMatrix}
           priceByDate={priceByDate}

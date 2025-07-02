@@ -53,100 +53,86 @@ export default function CBBCMatrixRow({
         className="border-t cursor-pointer hover:bg-blue-50"
         onClick={() => onToggle(range)}
       >
-        <td className="p-2 font-semibold bg-gray-50 whitespace-nowrap border-r border-gray-300">
+        <td className="p-2 font-semibold bg-white text-center border border-gray-300 whitespace-nowrap">
           {range}
         </td>
 
         {dateList.map((date, idx) => {
           const cell = cellForDate(date);
-          const isActive = activeDate === date;
-
-          const isEmpty =
-            !cell ||
-            (cell.notional === 0 &&
-              cell.quantity === 0 &&
-              cell.codes.length === 0);
-
-          const borderRight =
-            idx !== dateList.length - 1 ? "border-r border-gray-300" : "";
-
-          if (isEmpty) {
-            return isActive ? (
-              <Fragment key={`${range}-${date}-empty-active`}>
-                <td
-                  className={`p-1 text-center bg-blue-50 border border-blue-400 ${borderRight}`}
-                >
-                  –
-                </td>
-                <td
-                  className={`p-1 text-center bg-blue-50 border border-blue-400 ${borderRight}`}
-                >
-                  –
-                </td>
-                <td
-                  className={`p-1 text-center bg-blue-50 border border-blue-400 ${borderRight}`}
-                >
-                  –
-                </td>
-              </Fragment>
-            ) : (
-              <td
-                key={`${range}-${date}-empty`}
-                className={`p-1 text-center text-gray-400 ${borderRight}`}
-              >
-                –
-              </td>
-            );
-          }
-
-          if (isActive) {
-            const bullFirst = cell.items.find((i) => i.bull_bear === "Bull");
+          // Первая колонка — развернутая (active)
+          if (idx === 0) {
+            if (
+              !cell ||
+              (cell.notional === 0 &&
+                cell.quantity === 0 &&
+                cell.codes.length === 0)
+            ) {
+              return (
+                <Fragment key={`${range}-${date}-empty-active`}>
+                  <td
+                    className={`p-1 text-center bg-white border border-gray-300`}
+                  >
+                    –
+                  </td>
+                  <td
+                    className={`p-1 text-center bg-white border border-gray-300`}
+                  >
+                    –
+                  </td>
+                  <td
+                    className={`p-1 text-center bg-white border border-gray-300`}
+                  >
+                    –
+                  </td>
+                </Fragment>
+              );
+            }
+            // const bullFirst = cell.items.find((i) => i.bull_bear === "Bull");
             const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
-
             return (
               <Fragment key={`${range}-${date}-active`}>
-                <td className="relative p-1  border-1 border-blue-600 min-w-[100px] text-center bg-blue-50">
+                <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                   <div
                     className={`h-4 ${
                       bearFirst ? "bg-red-600" : "bg-green-600"
                     }`}
-                    style={{
-                      width: `${(cell.notional / maxNotional) * 100}%`,
-                    }}
+                    style={{ width: `${(cell.notional / maxNotional) * 100}%` }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
                     {toAbbreviatedNumber(cell.notional)}
                   </div>
                 </td>
-                <td className="relative p-1  border-1 border-blue-600 min-w-[100px] text-center bg-blue-50">
+                <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                   <div
-                    className={`h-4 ${
-                      bullFirst ? "bg-gray-300" : "bg-gray-300"
-                    }`}
-                    style={{
-                      width: `${(cell.quantity / maxQuantity) * 100}%`,
-                    }}
+                    className={`h-4 bg-gray-300`}
+                    style={{ width: `${(cell.quantity / maxQuantity) * 100}%` }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
                     {toAbbreviatedNumber(cell.quantity)}
                   </div>
                 </td>
-                <td className="p-1 text-center  border-1 border-blue-600 max-w-[200px] truncate bg-blue-50">
+                <td className="p-1 text-center border border-gray-300 max-w-[200px] truncate bg-white">
                   {cell.codes.join(", ")}
                 </td>
               </Fragment>
             );
-          } else {
+          }
+          // Следующие три — только notional, Total
+          else if (idx > 0 && idx < 4) {
             return (
               <td
-                key={`${range}-${date}-collapsed`}
-                className={`p-1 text-center text-gray-800 ${borderRight}`}
-                style={{ backgroundColor: getNotionalColor(cell.notional) }}
+                key={`${range}-${date}-total`}
+                className={`p-1 text-center text-gray-800 border border-gray-300 bg-gray-50`}
+                style={{
+                  backgroundColor: getNotionalColor(cell?.notional || 0),
+                }}
               >
-                {toAbbreviatedNumber(cell.notional)}
+                {cell ? toAbbreviatedNumber(cell.notional) : "–"}
               </td>
             );
           }
+          // Остальные даты не рендерим
+          return null;
         })}
       </tr>
 
