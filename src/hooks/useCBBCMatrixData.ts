@@ -44,7 +44,13 @@ export function useCBBCMatrixData(activeDate: string) {
           : cbcc_list;
 
         for (const cbcc of filteredList) {
-          const cell = matrix[range][date][cbcc.bull_bear as "Bull" | "Bear"];
+          const type = cbcc.bull_bear?.trim();
+
+          if (type !== "Bull" && type !== "Bear") {
+            console.warn("Некорректный bull_bear тип:", cbcc.bull_bear, cbcc);
+            continue;
+          }
+          const cell = matrix[range][date][type as "Bull" | "Bear"];
           cell.notional += cbcc.notional;
           cell.quantity += cbcc.quantity;
           cell.shares += cbcc.shares_number;

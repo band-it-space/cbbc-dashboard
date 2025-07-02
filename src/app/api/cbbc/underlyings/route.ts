@@ -1,5 +1,5 @@
 export async function GET() {
-  const res = await fetch("http://51.20.215.176:8000/metrics/underlyings");
+  const res = await fetch("http://13.230.195.0:8000/metrics/underlyings");
   if (!res.ok) {
     return new Response("Failed to fetch underlyings list", {
       status: res.status,
