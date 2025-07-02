@@ -10,7 +10,6 @@ type Props = {
   rangeList: string[];
   dateList: string[];
   activeDate: string;
-  onChangeActiveDate: (date: string) => void;
   bullMatrix: Record<string, Record<string, AggregatedCell>>;
   bearMatrix: Record<string, Record<string, AggregatedCell>>;
   priceByDate: Record<string, number>;
@@ -20,7 +19,6 @@ export default function CBBCMatrixTable({
   rangeList,
   dateList,
   activeDate,
-  onChangeActiveDate,
   bullMatrix,
   bearMatrix,
   priceByDate,
@@ -83,11 +81,7 @@ export default function CBBCMatrixTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border border-gray-300">
-        <CBBCMatrixHeader
-          dateList={dateList}
-          activeDate={activeDate}
-          onChangeActiveDate={onChangeActiveDate}
-        />
+        <CBBCMatrixHeader dateList={dateList} />
         <tbody>
           {/* Bear ranges (выше цены) */}
           {bearRanges.map((range) => (

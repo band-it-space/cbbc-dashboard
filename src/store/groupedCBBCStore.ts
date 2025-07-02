@@ -65,39 +65,52 @@ export type GroupedCBBCStore = {
   setMetaOptions: (underlyings: Underlying[], issuers: string[]) => void;
 };
 
-export const useGroupedCBBCStore = create<GroupedCBBCStore>((set) => ({
-  filters: {
-    from: "2025-06-11",
-    to: "2025-06-23",
-    range: 2,
-    underlying: "01211",
-    grouping: true,
+export const useGroupedCBBCStore = create<GroupedCBBCStore>((set) => {
+  // Получаем вчерашний день
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const from = new Date(yesterday);
+  from.setDate(yesterday.getDate() - 2);
+
+  function format(d: Date) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  return {
+    filters: {
+      from: format(from),
+      to: format(yesterday),
+      range: 2,
+      underlying: "01211",
+      grouping: true,
+      issuers: [],
+    },
+    setFilters: (update) =>
+      set((state) => ({ filters: { ...state.filters, ...update } })),
+
+    rawData: [],
+    setRawData: (data) => set({ rawData: data }),
+
+    groupedRawData: [],
+    setGroupedRawData: (data) => set({ groupedRawData: data }),
+
+    lastFetchedFilters: null,
+    setLastFetchedFilters: (filters) => set({ lastFetchedFilters: filters }),
+
+    hasFetchedOnce: false,
+    setHasFetchedOnce: (val) => set({ hasFetchedOnce: val }),
+
+    bullGroups: [],
+    bearGroups: [],
+    setGroupedData: (bull, bear) => set({ bullGroups: bull, bearGroups: bear }),
+
+    groupedMap: {},
+    setGroupedMap: (map) => set({ groupedMap: map }),
+
+    underlyings: [],
     issuers: [],
-  },
-  setFilters: (update) =>
-    set((state) => ({ filters: { ...state.filters, ...update } })),
-
-  rawData: [],
-  setRawData: (data) => set({ rawData: data }),
-
-  groupedRawData: [],
-  setGroupedRawData: (data) => set({ groupedRawData: data }),
-
-  lastFetchedFilters: null,
-  setLastFetchedFilters: (filters) => set({ lastFetchedFilters: filters }),
-
-  hasFetchedOnce: false,
-  setHasFetchedOnce: (val) => set({ hasFetchedOnce: val }),
-
-  bullGroups: [],
-  bearGroups: [],
-  setGroupedData: (bull, bear) => set({ bullGroups: bull, bearGroups: bear }),
-
-  groupedMap: {},
-  setGroupedMap: (map) => set({ groupedMap: map }),
-
-  underlyings: [],
-  issuers: [],
-  setUnderlyings: (list) => set({ underlyings: list }),
-  setMetaOptions: (underlyings, issuers) => set({ underlyings, issuers }),
-}));
+    setUnderlyings: (list) => set({ underlyings: list }),
+    setMetaOptions: (underlyings, issuers) => set({ underlyings, issuers }),
+  };
+});

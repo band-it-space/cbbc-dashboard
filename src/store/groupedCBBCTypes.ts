@@ -55,6 +55,7 @@ export interface AggregatedCell {
 export interface Filters {
   from?: string;
   to?: string;
+  date?: string;
   underlying?: string;
   range?: number;
   issuer?: string[];

@@ -3,6 +3,7 @@ import { Underlying } from "@/components/FiltersPanel";
 export interface Filters {
   from?: string;
   to?: string;
+  date?: string;
   underlying?: string;
   range?: number;
   issuer?: string[];
