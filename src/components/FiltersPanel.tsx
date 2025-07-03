@@ -25,9 +25,7 @@ export default function FiltersPanel({
   const handleChange = (field: keyof Filters, value: any) => {
     const updated = { ...localFilters, [field]: value };
     updateLocalFilters(updated);
-    if (field === "date") {
-      setLocalFilters(updated);
-    }
+    setLocalFilters(updated);
   };
 
   const sortedUnderlyings = useMemo(() => {
@@ -92,6 +90,7 @@ export default function FiltersPanel({
             <input
               type="number"
               min={0}
+              step="any"
               value={localFilters.range ?? 0}
               onChange={(e) =>
                 handleChange("range", parseFloat(e.target.value) || 0)
