@@ -43,16 +43,13 @@ export default function DashboardPageV2() {
   const [activeDate, setActiveDate] = useState<string>("");
   const [hasInitializedDate, setHasInitializedDate] = useState(false);
 
-  const handleDateChange = (dateStr: string) => {
-    setLocalFilters((prev) => ({ ...prev, date: dateStr }));
-  };
-
   useEffect(() => {
     setLocalFilters((prev) => ({ ...prev, ...filters, date: filters.to }));
     setHasInitializedDate(false);
   }, [filters]);
 
   const handleApplyFilters = async () => {
+    const newFilters = { ...localFilters };
     let to = localFilters.date;
     let from = localFilters.date;
     if (localFilters.date) {
@@ -62,7 +59,9 @@ export default function DashboardPageV2() {
       from = start.toISOString().slice(0, 10);
       to = end.toISOString().slice(0, 10);
     }
-    setFilters({ ...filters, to, from });
+    newFilters.to = to;
+    newFilters.from = from;
+    setFilters(newFilters);
     await new Promise((resolve) => setTimeout(resolve, 0));
     await refetch();
   };
@@ -119,10 +118,7 @@ export default function DashboardPageV2() {
         <FiltersPanel
           filters={localFilters}
           underlyings={underlyings}
-          setLocalFilters={(update: Partial<Filters>) => {
-            if (update.date) handleDateChange(update.date as string);
-            else setLocalFilters((prev) => ({ ...prev, ...update }));
-          }}
+          setLocalFilters={(update: Filters) => setLocalFilters(update)}
           onApply={handleApplyFilters}
         />
       </div>
