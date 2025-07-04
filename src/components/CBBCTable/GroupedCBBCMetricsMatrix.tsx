@@ -10,6 +10,7 @@ type Props = {
   rangeList: string[];
   dateList: string[];
   activeDate: string;
+  prevDate?: string;
   bullMatrix: Record<string, Record<string, AggregatedCell>>;
   bearMatrix: Record<string, Record<string, AggregatedCell>>;
   priceByDate: Record<string, number>;
@@ -19,6 +20,7 @@ export default function CBBCMatrixTable({
   rangeList,
   dateList,
   activeDate,
+  prevDate,
   bullMatrix,
   bearMatrix,
   priceByDate,
@@ -75,9 +77,6 @@ export default function CBBCMatrixTable({
     }, 0);
   }, [bullRanges, bullMatrix, activeDate]);
 
-  console.log(bullMatrix);
-  console.log(bearMatrix);
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border border-gray-300">
@@ -91,6 +90,7 @@ export default function CBBCMatrixTable({
                 dateList={dateList}
                 matrix={bearMatrix}
                 activeDate={activeDate}
+                prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bear`] || false}
                 onToggle={() => toggleRow(range, "Bear")}
                 maxNotional={maxNotional}
@@ -118,6 +118,7 @@ export default function CBBCMatrixTable({
                 dateList={dateList}
                 matrix={bullMatrix}
                 activeDate={activeDate}
+                prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bull`] || false}
                 onToggle={() => toggleRow(range, "Bull")}
                 maxNotional={maxNotional}

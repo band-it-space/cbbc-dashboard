@@ -27,20 +27,16 @@ import { useEffect, useMemo } from "react";
 //   return res.json();
 // }
 
-async function fetchGroupedCBBC(filters: {
-  from: string;
-  to: string;
-  underlying?: string;
-  range: number;
-  issuer?: string;
-}): Promise<GroupedBackendCBBC[]> {
-  const { from, to, underlying, range, issuer } = filters;
+async function fetchGroupedCBBC(
+  filters: any,
+  date: string
+): Promise<GroupedBackendCBBC[]> {
+  const { underlying, range, issuer } = filters;
   const params = new URLSearchParams();
 
   if (underlying) params.append("ul", underlying);
   if (range) params.append("call_level_step", range.toString());
-  if (from) params.append("start_date", from);
-  if (to) params.append("end_date", to);
+  if (date) params.append("start_date", date);
   if (issuer) params.append("issuer", issuer);
 
   const res = await fetch(`/api/cbbc/aggregate?${params.toString()}`);
@@ -50,29 +46,32 @@ async function fetchGroupedCBBC(filters: {
 }
 
 export const useGroupedCBBCQuery = () => {
-  const { filters, setGroupedRawData, setLastFetchedFilters } =
+  const { filters, date, setGroupedRawData, setLastFetchedFilters } =
     useGroupedCBBCStore();
-
   const queryKey = useMemo(
-    () => [
-      "grouped-cbbc",
-      filters.from,
-      filters.to,
-      filters.underlying,
-      filters.range,
-    ],
-    [filters.from, filters.to, filters.underlying, filters.range]
+    () => ["grouped-cbbc", date, filters.underlying, filters.range],
+    [date, filters.underlying, filters.range]
   );
-
   const query = useQuery<GroupedBackendCBBC[], Error>({
     queryKey,
-    queryFn: () => fetchGroupedCBBC(filters),
+    queryFn: () => fetchGroupedCBBC(filters, date || ""),
+    enabled: false,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
     if (query.data) {
+      // Определяем диапазон дат из ответа
+      const dates = query.data.map((row) => row.date).sort();
+      if (dates.length > 0) {
+        const from = dates[0];
+        const to = dates[dates.length - 1];
+        const { filters, setFilters } = useGroupedCBBCStore.getState();
+        if (filters.from !== from || filters.to !== to) {
+          setFilters({ from, to });
+        }
+      }
       setGroupedRawData([...query.data]);
       setLastFetchedFilters(filters);
 

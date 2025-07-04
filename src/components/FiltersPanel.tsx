@@ -1,5 +1,8 @@
 import { Filters } from "@/store/types";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useAvailableDatesQuery } from "@/hooks/useUnderlyingsQuery";
+import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
+import { formatDateHuman, getSortedUnderlyings } from "@/lib/utils";
 
 export type Underlying = {
   code: string;
@@ -12,48 +15,53 @@ const PRIORITY_CODES = ["HSI", "HSCEI", "HSTEC", "700", "9988"];
 export default function FiltersPanel({
   filters,
   underlyings,
-  setLocalFilters,
   onApply,
+  isFetching,
 }: {
   filters: Filters;
   underlyings: Underlying[];
-  setLocalFilters: (update: Filters) => void;
   onApply: () => void;
+  isFetching?: boolean;
 }) {
   const [localFilters, updateLocalFilters] = useState(filters);
+  const date = useGroupedCBBCStore((s) => s.date);
+  const setDate = useGroupedCBBCStore((s) => s.setDate);
+  const setFilters = useGroupedCBBCStore((s) => s.setFilters);
+
+  const ul =
+    localFilters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
+  const { data: availableDatesRaw, isLoading: isDatesLoading } =
+    useAvailableDatesQuery(ul);
+  const availableDates: string[] = Array.isArray(availableDatesRaw)
+    ? availableDatesRaw
+    : [];
+
+  useEffect(() => {
+    if (availableDates.length > 0 && !localFilters.date) {
+      const lastDate = availableDates[0];
+      const updated = { ...localFilters, date: lastDate };
+      updateLocalFilters(updated);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableDates]);
+
+  useEffect(() => {
+    updateLocalFilters(filters);
+  }, [filters]);
 
   const handleChange = (field: keyof Filters, value: any) => {
     const updated = { ...localFilters, [field]: value };
     updateLocalFilters(updated);
-    setLocalFilters(updated);
   };
 
-  const sortedUnderlyings = useMemo(() => {
-    return [...underlyings].sort((a, b) => {
-      const indexA = PRIORITY_CODES.indexOf(a.code);
-      const indexB = PRIORITY_CODES.indexOf(b.code);
-
-      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-      if (indexA !== -1) return -1;
-      if (indexB !== -1) return 1;
-      return a.name.localeCompare(b.name);
-    });
-  }, [underlyings]);
+  const sortedUnderlyings = useMemo(
+    () => getSortedUnderlyings(underlyings, PRIORITY_CODES),
+    [underlyings]
+  );
 
   return (
     <div className="bg-white border border-gray-200 shadow rounded p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
-        {/* Single Date */}
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Date</label>
-          <input
-            type="date"
-            value={localFilters.date || ""}
-            onChange={(e) => handleChange("date", e.target.value)}
-            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
-          />
-        </div>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
         {/* Underlying */}
         <div>
           <label className="block text-sm text-gray-600 mb-1">Underlying</label>
@@ -71,6 +79,24 @@ export default function FiltersPanel({
                 </option>
               );
             })}
+          </select>
+        </div>
+
+        {/* Date Select */}
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Date</label>
+          <select
+            value={date || ""}
+            onChange={(e) => setDate(e.target.value || null)}
+            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
+            disabled={isDatesLoading || availableDates.length === 0}
+          >
+            <option value="">Select Date</option>
+            {availableDates.map((date: string) => (
+              <option key={date} value={date}>
+                {formatDateHuman(date)}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -113,10 +139,13 @@ export default function FiltersPanel({
         <div className="flex">
           <button
             onClick={() => {
-              setLocalFilters(localFilters);
-              onApply();
+              setFilters({
+                underlying: localFilters.underlying,
+                range: localFilters.range,
+              });
+              setTimeout(() => onApply(), 0);
             }}
-            disabled={!localFilters.date}
+            disabled={!!isFetching}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
             Apply

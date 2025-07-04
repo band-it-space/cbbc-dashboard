@@ -12,8 +12,8 @@ export default function CBBCDashboardStats({
   selectedIssuers,
   onIssuerChange,
 }: {
-  from: string;
-  to: string;
+  from?: string;
+  to?: string;
   issuerOptions: SelectOption[];
   selectedIssuers: string[];
   onIssuerChange: (values: string[]) => void;

@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { getNotionalColor } from "./NotionalLegend";
-import { toAbbreviatedNumber } from "@/lib/utils";
+import { toAbbreviatedNumber, formatDiff } from "@/lib/utils";
 import Link from "next/link";
 
 type Item = {
@@ -29,6 +29,7 @@ type Props = {
   dateList: string[];
   matrix: Record<string, Record<string, AggregatedCell>>;
   activeDate: string;
+  prevDate?: string;
   isExpanded: boolean;
   onToggle: (range: string) => void;
   maxNotional: number;
@@ -40,12 +41,14 @@ export default function CBBCMatrixRow({
   dateList,
   matrix,
   activeDate,
+  prevDate,
   isExpanded,
   onToggle,
   maxNotional,
   maxQuantity,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
+  console.log("matrix", matrix);
 
   return (
     <Fragment>
@@ -59,7 +62,6 @@ export default function CBBCMatrixRow({
 
         {dateList.map((date, idx) => {
           const cell = cellForDate(date);
-          // Первая колонка — развернутая (active)
           if (idx === 0) {
             if (
               !cell ||
@@ -87,7 +89,6 @@ export default function CBBCMatrixRow({
                 </Fragment>
               );
             }
-            // const bullFirst = cell.items.find((i) => i.bull_bear === "Bull");
             const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
             return (
               <Fragment key={`${range}-${date}-active`}>
@@ -100,6 +101,18 @@ export default function CBBCMatrixRow({
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
                     {toAbbreviatedNumber(cell.notional)}
+                    {prevDate && matrix[range]?.[prevDate]
+                      ? (() => {
+                          const prevNotional = matrix[range][prevDate].notional;
+                          const diff = cell.notional - prevNotional;
+                          if (diff === 0) return null;
+                          return (
+                            <span className="ml-1 text-xs font-normal text-gray-500">
+                              [{formatDiff(diff)}]
+                            </span>
+                          );
+                        })()
+                      : null}
                   </div>
                 </td>
                 <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
@@ -116,9 +129,7 @@ export default function CBBCMatrixRow({
                 </td>
               </Fragment>
             );
-          }
-          // Следующие три — только notional, Total
-          else if (idx > 0 && idx < 4) {
+          } else if (idx > 0 && idx < 4) {
             return (
               <td
                 key={`${range}-${date}-total`}
@@ -131,7 +142,6 @@ export default function CBBCMatrixRow({
               </td>
             );
           }
-          // Остальные даты не рендерим
           return null;
         })}
       </tr>

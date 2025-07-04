@@ -7,8 +7,9 @@ const buckets = [
 
 export function NotionalLegend() {
   return (
-    <div className="flex items-center gap-2 text-sm my-2">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm my-2">
       <span className="font-semibold">Outstanding Notional (USD):</span>
+
       {buckets.map((b, i) => (
         <span key={i} className="flex items-center gap-1">
           <span

@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import FiltersPanel from "@/components/FiltersPanel";
 import CBBCDashboardStats from "@/components/CBBCDashboardStats";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { useGroupedCBBCQuery } from "@/hooks/useGroupedCBBCQuery";
 import CBBCMatrixTable from "@/components/CBBCTable/GroupedCBBCMetricsMatrix";
 import { useCBBCMatrixData } from "@/hooks/useCBBCMatrixData";
-import { useUnderlyingsQuery } from "@/hooks/useUnderlyingsQuery";
-import { Filters } from "@/store/groupedCBBCTypes";
+import {
+  useUnderlyingsQuery,
+  useAvailableDatesQuery,
+} from "@/hooks/useUnderlyingsQuery";
 
 export default function DashboardPageV2() {
-  const { filters, setFilters, groupedRawData, issuers } =
+  const { filters, setFilters, setDate, date, groupedRawData, issuers } =
     useGroupedCBBCStore();
   const { data: underlyings = [] } = useUnderlyingsQuery();
   const { isFetching, refetch } = useGroupedCBBCQuery();
@@ -36,33 +38,24 @@ export default function DashboardPageV2() {
     }
   }, [filters.to, setFilters]);
 
-  const [localFilters, setLocalFilters] = useState<Filters>({
-    ...filters,
-    date: filters.to,
-  });
-  const [activeDate, setActiveDate] = useState<string>("");
-  const [hasInitializedDate, setHasInitializedDate] = useState(false);
+  const ulCode =
+    filters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
+  const { data: availableDatesRaw } = useAvailableDatesQuery(ulCode);
+  const availableDates = useMemo(() => {
+    return Array.isArray(availableDatesRaw) ? availableDatesRaw : [];
+  }, [availableDatesRaw]);
 
   useEffect(() => {
-    setLocalFilters((prev) => ({ ...prev, ...filters, date: filters.to }));
-    setHasInitializedDate(false);
-  }, [filters]);
+    if (availableDates.length > 0 && !date) {
+      const firstDate = availableDates[0];
+      if (firstDate) {
+        setDate(firstDate);
+        setTimeout(() => refetch(), 0);
+      }
+    }
+  }, [availableDates, date, setDate, refetch]);
 
   const handleApplyFilters = async () => {
-    const newFilters = { ...localFilters };
-    let to = localFilters.date;
-    let from = localFilters.date;
-    if (localFilters.date) {
-      const end = new Date(localFilters.date);
-      const start = new Date(end);
-      start.setDate(end.getDate() - 2);
-      from = start.toISOString().slice(0, 10);
-      to = end.toISOString().slice(0, 10);
-    }
-    newFilters.to = to;
-    newFilters.from = from;
-    setFilters(newFilters);
-    await new Promise((resolve) => setTimeout(resolve, 0));
     await refetch();
   };
 
@@ -72,30 +65,23 @@ export default function DashboardPageV2() {
     bullMatrix,
     bearMatrix,
     priceByDate,
-  } = useCBBCMatrixData(activeDate);
+  } = useCBBCMatrixData(filters.from, filters.to, filters.issuers || []);
 
   const displayDateList = useMemo(() => {
-    if (!activeDate) return [];
-    const idx = allDates.indexOf(activeDate);
-    if (idx === -1) return [];
-    const prevDates = allDates.slice(Math.max(0, idx - 2), idx + 1).reverse();
-    return [activeDate, ...prevDates];
-  }, [activeDate, allDates]);
+    if (!filters.to || allDates.length === 0) return allDates;
+    const idx = (allDates as string[]).indexOf(filters.to!);
+    if (idx === -1) return allDates;
+    const activeDate = allDates[idx];
+    const previousDates = allDates.slice(idx + 1); // даты идут от новых к старым
+    return [activeDate, activeDate, ...previousDates];
+  }, [allDates, filters.to]);
 
-  useEffect(() => {
-    if (!hasInitializedDate && allDates.length > 0) {
-      setActiveDate(allDates[0]);
-      setHasInitializedDate(true);
-    }
-  }, [allDates, hasInitializedDate]);
-
-  useEffect(() => {
-    if (localFilters.date && allDates.includes(localFilters.date)) {
-      setActiveDate(localFilters.date);
-    } else if (localFilters.date && allDates.length > 0) {
-      setActiveDate("");
-    }
-  }, [localFilters.date, allDates]);
+  const prevDate = useMemo(() => {
+    if (!filters.to || allDates.length === 0) return undefined;
+    const idx = (allDates as string[]).indexOf(filters.to!);
+    if (idx === -1 || idx + 1 >= allDates.length) return undefined;
+    return allDates[idx + 1];
+  }, [allDates, filters.to]);
 
   const issuerOptions = useMemo(
     () =>
@@ -116,16 +102,16 @@ export default function DashboardPageV2() {
 
       <div className="mb-4">
         <FiltersPanel
-          filters={localFilters}
+          filters={filters}
           underlyings={underlyings}
-          setLocalFilters={(update: Filters) => setLocalFilters(update)}
           onApply={handleApplyFilters}
+          isFetching={isFetching}
         />
       </div>
 
       <CBBCDashboardStats
-        from={filters.from}
-        to={filters.to}
+        from={filters.from ?? undefined}
+        to={filters.to ?? undefined}
         issuerOptions={issuerOptions}
         selectedIssuers={filters.issuers || []}
         onIssuerChange={handleIssuerChange}
@@ -139,11 +125,12 @@ export default function DashboardPageV2() {
           <div className="h-6 bg-gray-200 rounded w-2/3" />
           <div className="h-6 bg-gray-200 rounded w-3/4" />
         </div>
-      ) : !isFetching && groupedRawData.length > 0 && activeDate ? (
+      ) : !isFetching && groupedRawData.length > 0 && filters.to ? (
         <CBBCMatrixTable
           rangeList={rangeList}
           dateList={displayDateList}
-          activeDate={activeDate}
+          activeDate={filters.to}
+          prevDate={prevDate}
           bullMatrix={bullMatrix}
           bearMatrix={bearMatrix}
           priceByDate={priceByDate}
