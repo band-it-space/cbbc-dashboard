@@ -7,8 +7,8 @@ export default function Header() {
     <header
       className="shadow-sm"
       style={{
-        backgroundColor: "#ffffff", // белый фон
-        borderBottom: "1px solid #E5E7EB", // border-border (gray-200)
+        backgroundColor: "#ffffff",
+        borderBottom: "1px solid #E5E7EB",
       }}
     >
       <div className="w-full max-w-screen-2xl mx-auto py-6 flex items-center justify-between px-6">
@@ -22,10 +22,10 @@ export default function Header() {
             href="/dashboard"
             className="font-medium transition hover:underline"
             style={{
-              color: "#4B5563", // muted
+              color: "#4B5563",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.color = "#2563EB"; // secondary (hover)
+              e.currentTarget.style.color = "#2563EB";
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.color = "#4B5563";
@@ -33,7 +33,6 @@ export default function Header() {
           >
             Dashboard
           </Link>
-          {/* Добавь дополнительные ссылки по мере необходимости */}
         </nav>
       </div>
     </header>

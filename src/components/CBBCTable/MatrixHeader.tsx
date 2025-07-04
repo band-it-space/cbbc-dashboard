@@ -1,15 +1,8 @@
 "use client";
 
-export default function CBBCMatrixHeader({ dateList }: { dateList: string[] }) {
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  }
+import { formatDateHuman } from "@/lib/utils";
 
+export default function CBBCMatrixHeader({ dateList }: { dateList: string[] }) {
   return (
     <thead>
       <tr>
@@ -42,7 +35,7 @@ export default function CBBCMatrixHeader({ dateList }: { dateList: string[] }) {
             key={date}
             className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"
           >
-            {formatDate(date)}
+            {formatDateHuman(date)}
           </th>
         ))}
       </tr>

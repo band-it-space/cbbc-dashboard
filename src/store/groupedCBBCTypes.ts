@@ -8,8 +8,8 @@ export interface GroupedCBBCEntry {
   shares_number: number;
   ul_price: number;
   issuer: string;
-  bull_bear: "Bull" | "Bear"; // ✅ добавляем
-  date: string; // ✅ добавляем (добавляется вручную в cell.items)
+  bull_bear: "Bull" | "Bear";
+  date: string;
 }
 
 export interface GroupedBackendCBBC {
