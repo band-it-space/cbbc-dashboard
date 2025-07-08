@@ -2,7 +2,11 @@ import { Filters } from "@/store/types";
 import { useMemo, useState, useEffect } from "react";
 import { useAvailableDatesQuery } from "@/hooks/useUnderlyingsQuery";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
-import { formatDateHuman, getSortedUnderlyings } from "@/lib/utils";
+import {
+  formatDateHuman,
+  getSortedUnderlyings,
+  formatUnderlyingCode,
+} from "@/lib/utils";
 
 export type Underlying = {
   code: string;
@@ -29,7 +33,8 @@ export default function FiltersPanel({
   const setFilters = useGroupedCBBCStore((s) => s.setFilters);
 
   const ul =
-    localFilters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
+    localFilters.underlying ||
+    (underlyings[0] ? formatUnderlyingCode(underlyings[0].code) : "");
   const { data: availableDatesRaw, isLoading: isDatesLoading } =
     useAvailableDatesQuery(ul);
   const availableDates: string[] = Array.isArray(availableDatesRaw)
@@ -72,10 +77,10 @@ export default function FiltersPanel({
           >
             <option value="">Select Underlying</option>
             {sortedUnderlyings.map((u) => {
-              const paddedCode = u.code.padStart(5, "0");
+              const formattedCode = formatUnderlyingCode(u.code);
               return (
-                <option key={paddedCode} value={paddedCode}>
-                  {u.name} ({paddedCode})
+                <option key={formattedCode} value={formattedCode}>
+                  {u.name} ({formattedCode})
                 </option>
               );
             })}

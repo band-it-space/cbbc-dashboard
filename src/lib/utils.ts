@@ -46,34 +46,10 @@ export function getSortedUnderlyings(
 }
 
 export function formatUnderlyingCode(code: string): string {
-  
+  // Если код содержит буквы (HSI, HSCEI, HSTEC), возвращаем как есть
   if (/[A-Z]/.test(code)) {
     return code;
   }
-  
+  // Для цифровых кодов добавляем нули до 5 символов
   return code.padStart(5, "0");
-}
-
-export function generateRangeSequence(
-  ulPrice: number,
-  groupStep: number,
-  count: number = 20
-): string[] {
-  const ranges: string[] = [];
-
-  
-  for (let i = 0; i < count / 2; i++) {
-    const start = ulPrice + i * groupStep;
-    const end = start + groupStep - 0.02; // 171.98 = 172.0 - 0.02
-    ranges.push(`${start.toFixed(1)} - ${end.toFixed(2)}`);
-  }
-
-  
-  for (let i = 1; i <= count / 2; i++) {
-    const start = ulPrice - i * groupStep;
-    const end = start + groupStep - 0.02;
-    ranges.push(`${start.toFixed(1)} - ${end.toFixed(2)}`);
-  }
-
-  return ranges;
 }

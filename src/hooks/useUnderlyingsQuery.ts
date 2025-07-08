@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { Underlying } from "@/components/FiltersPanel";
-import { formatUnderlyingCode } from "@/lib/utils";
 
 async function fetchUnderlyings(): Promise<Underlying[]> {
   const res = await fetch("/api/cbbc/underlyings");
@@ -27,8 +26,7 @@ export function useUnderlyingsQuery() {
 }
 
 export async function fetchAvailableDates(ul: string): Promise<string[]> {
-  const formattedUnderlying = formatUnderlyingCode(ul);
-  const res = await fetch(`/api/cbbc/last-dates?ul=${formattedUnderlying}`);
+  const res = await fetch(`/api/cbbc/last-dates?ul=${ul}`);
   if (!res.ok) throw new Error("Failed to fetch available dates");
   return res.json();
 }
