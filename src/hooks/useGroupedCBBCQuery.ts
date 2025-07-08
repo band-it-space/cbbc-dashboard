@@ -2,30 +2,9 @@ import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import type { GroupedBackendCBBC } from "@/store/groupedCBBCTypes";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+import { formatUnderlyingCode } from "@/lib/utils";
 
-// async function fetchGroupedCBBC(filters: {
-//   from: string;
-//   to: string;
-//   underlying?: string;
-//   range: number;
-//   issuer?: string;
-// }): Promise<GroupedBackendCBBC[]> {
-//   const { from, to, underlying, range, issuer } = filters;
-//   const params = new URLSearchParams();
 
-//   if (underlying) params.append("ul", underlying);
-//   if (range) params.append("call_level_step", range.toString());
-//   if (from) params.append("start_date", from);
-//   if (to) params.append("end_date", to);
-//   if (issuer) params.append("issuer", issuer);
-
-//   const res = await fetch(
-//     `http://51.20.215.176:8000/metrics/cbbc/metrics/cbbc/aggregate?${params.toString()}`
-//   );
-//   if (!res.ok) throw new Error("Failed to fetch aggregated CBBC data");
-
-//   return res.json();
-// }
 
 async function fetchGroupedCBBC(
   filters: any,
@@ -34,7 +13,10 @@ async function fetchGroupedCBBC(
   const { underlying, range, issuer } = filters;
   const params = new URLSearchParams();
 
-  if (underlying) params.append("ul", underlying);
+  if (underlying) {
+    const formattedUnderlying = formatUnderlyingCode(underlying);
+    params.append("ul", formattedUnderlying);
+  }
   if (range) params.append("call_level_step", range.toString());
   if (date) params.append("start_date", date);
   if (issuer) params.append("issuer", issuer);
@@ -62,7 +44,6 @@ export const useGroupedCBBCQuery = () => {
 
   useEffect(() => {
     if (query.data) {
-      // Определяем диапазон дат из ответа
       const dates = query.data.map((row) => row.date).sort();
       if (dates.length > 0) {
         const from = dates[0];
@@ -75,7 +56,6 @@ export const useGroupedCBBCQuery = () => {
       setGroupedRawData([...query.data]);
       setLastFetchedFilters(filters);
 
-      // ⬇️ Собираем всех эмитентов из ответа
       const allIssuers = new Set<string>();
       for (const row of query.data) {
         for (const item of row.cbcc_list) {
@@ -83,7 +63,6 @@ export const useGroupedCBBCQuery = () => {
         }
       }
 
-      // ⬇️ Сохраняем в Zustand
       useGroupedCBBCStore
         .getState()
         .setMetaOptions(
