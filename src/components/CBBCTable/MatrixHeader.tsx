@@ -12,24 +12,26 @@ export default function CBBCMatrixHeader({ dateList }: { dateList: string[] }) {
         >
           Call Range
         </th>
+        {/* Активная дата (первая) с 3 колонками */}
         <th
           className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"
           style={{ minWidth: 80 }}
         >
-          Notional
+          {formatDateHuman(dateList[0])} - Notional
         </th>
         <th
           className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"
           style={{ minWidth: 80 }}
         >
-          Quantity
+          {formatDateHuman(dateList[0])} - Quantity
         </th>
         <th
           className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"
           style={{ minWidth: 80 }}
         >
-          Codes
+          {formatDateHuman(dateList[0])} - Codes
         </th>
+        {/* Остальные даты по 1 колонке */}
         {dateList.slice(1, 4).map((date) => (
           <th
             key={date}

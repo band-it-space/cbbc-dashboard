@@ -9,7 +9,7 @@ type CBBCItem = {
   call_level: number;
   quantity: number;
   notional: number;
-  shares_number: number;
+  shares_number: number | null;
   ul_price: number;
   bull_bear: "Bull" | "Bear";
   issuer: string;
@@ -85,13 +85,17 @@ export default function CBBCCodePage() {
               <td className="p-2 border">{item.notional.toLocaleString()}</td>
               <td className="p-2 border">{item.quantity.toLocaleString()}</td>
               <td className="p-2 border">
-                {item.shares_number.toLocaleString()}
+                {item.shares_number ? item.shares_number.toLocaleString() : "—"}
               </td>
               <td className="p-2 border">
-                {(item.notional / item.quantity).toFixed(2)}x
+                {item.ul_price && item.call_level
+                  ? (item.ul_price / item.call_level).toFixed(2) + "x"
+                  : "—"}
               </td>
               <td className="p-2 border">
-                {item.conversion_ratio?.toLocaleString() ?? "-"}
+                {item.shares_number
+                  ? (item.quantity / item.shares_number).toLocaleString()
+                  : "—"}
               </td>
               <td className="p-2 border">{item.bull_bear}</td>
               <td className="p-2 border">{item.issuer}</td>

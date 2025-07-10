@@ -11,7 +11,7 @@ type Item = {
   ul_price: number;
   quantity: number;
   notional: number;
-  shares_number: number;
+  shares_number: number | null;
   bull_bear: "Bull" | "Bear";
   issuer: string;
   date: string;
@@ -148,7 +148,7 @@ export default function CBBCMatrixRow({
 
       {isExpanded && matrix[range]?.[activeDate]?.items?.length > 0 && (
         <tr className="border-t bg-gray-100">
-          <td colSpan={1 + dateList.length * 3} className="p-2">
+          <td colSpan={1 + 3 + (dateList.length - 1)} className="p-2">
             <div className="flex flex-col gap-1">
               <div className="flex justify-start">
                 <button
