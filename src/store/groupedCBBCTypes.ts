@@ -10,6 +10,8 @@ export interface GroupedCBBCEntry {
   issuer: string;
   bull_bear: "Bull" | "Bear";
   date: string;
+  os_percent: number;
+  last_price: number;
 }
 
 export interface GroupedBackendCBBC {

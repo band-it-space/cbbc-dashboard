@@ -15,6 +15,8 @@ type CBBCItem = {
   issuer: string;
   date?: string;
   conversion_ratio?: number;
+  os_percent: number;
+  last_price: number;
 };
 
 export default function CBBCCodePage() {
@@ -67,6 +69,8 @@ export default function CBBCCodePage() {
             <th className="p-2 border">Date</th>
             <th className="p-2 border">Call Level</th>
             <th className="p-2 border">UL Price</th>
+            <th className="p-2 border">Last Price</th>
+            <th className="p-2 border">OS Percent</th>
             <th className="p-2 border">Notional</th>
             <th className="p-2 border">Quantity</th>
             <th className="p-2 border">Shares</th>
@@ -82,6 +86,8 @@ export default function CBBCCodePage() {
               <td className="p-2 border">{item.date}</td>
               <td className="p-2 border">{item.call_level}</td>
               <td className="p-2 border">{item.ul_price}</td>
+              <td className="p-2 border">{item.last_price}</td>
+              <td className="p-2 border">{item.os_percent}%</td>
               <td className="p-2 border">{item.notional.toLocaleString()}</td>
               <td className="p-2 border">{item.quantity.toLocaleString()}</td>
               <td className="p-2 border">

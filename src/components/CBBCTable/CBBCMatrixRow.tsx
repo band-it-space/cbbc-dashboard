@@ -2,7 +2,11 @@
 
 import { Fragment } from "react";
 import { getNotionalColor } from "./NotionalLegend";
-import { toAbbreviatedNumber, formatDiff } from "@/lib/utils";
+import {
+  toAbbreviatedNumber,
+  formatDiff,
+  formatCurrencyPair,
+} from "@/lib/utils";
 import Link from "next/link";
 
 type Item = {
@@ -34,6 +38,7 @@ type Props = {
   onToggle: (range: string) => void;
   maxNotional: number;
   maxQuantity: number;
+  underlyingCode: string;
 };
 
 export default function CBBCMatrixRow({
@@ -46,6 +51,7 @@ export default function CBBCMatrixRow({
   onToggle,
   maxNotional,
   maxQuantity,
+  underlyingCode,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
   console.log("matrix", matrix);
@@ -90,34 +96,44 @@ export default function CBBCMatrixRow({
               );
             }
             const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
+            const { hkd, usd } = formatCurrencyPair(
+              cell.notional,
+              underlyingCode
+            );
             return (
               <Fragment key={`${range}-${date}-active`}>
                 <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                   <div
-                    className={`h-4 ${
-                      bearFirst ? "bg-red-600" : "bg-green-600"
+                    className={`h-8 ${
+                      bearFirst ? "bg-red-400" : "bg-green-400"
                     }`}
                     style={{ width: `${(cell.notional / maxNotional) * 100}%` }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
-                    {toAbbreviatedNumber(cell.notional)}
-                    {prevDate && matrix[range]?.[prevDate]
-                      ? (() => {
-                          const prevNotional = matrix[range][prevDate].notional;
-                          const diff = cell.notional - prevNotional;
-                          if (diff === 0) return null;
-                          return (
-                            <span className="ml-1 text-xs font-normal text-gray-500">
-                              [{formatDiff(diff)}]
-                            </span>
-                          );
-                        })()
-                      : null}
+                    <div className="flex items-center gap-1">
+                      <div className="flex flex-col">
+                        <span>{hkd} HKD</span>
+                        <span className="text-gray-600">{usd} USD</span>
+                      </div>
+                      {prevDate && matrix[range]?.[prevDate]
+                        ? (() => {
+                            const prevNotional =
+                              matrix[range][prevDate].notional;
+                            const diff = cell.notional - prevNotional;
+                            if (diff === 0) return null;
+                            return (
+                              <span className="text-xs font-normal text-gray-500">
+                                [{formatDiff(diff)}]
+                              </span>
+                            );
+                          })()
+                        : null}
+                    </div>
                   </div>
                 </td>
                 <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                   <div
-                    className={`h-4 bg-gray-300`}
+                    className={`h-8 bg-gray-300`}
                     style={{ width: `${(cell.quantity / maxQuantity) * 100}%` }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
@@ -130,6 +146,10 @@ export default function CBBCMatrixRow({
               </Fragment>
             );
           } else if (idx > 0 && idx < 4) {
+            const { hkd, usd } = formatCurrencyPair(
+              cell?.notional || 0,
+              underlyingCode
+            );
             return (
               <td
                 key={`${range}-${date}-total`}
@@ -138,7 +158,14 @@ export default function CBBCMatrixRow({
                   backgroundColor: getNotionalColor(cell?.notional || 0),
                 }}
               >
-                {cell ? toAbbreviatedNumber(cell.notional) : "–"}
+                {cell ? (
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold">{hkd}</span>
+                    <span className="text-xs text-gray-600">{usd}</span>
+                  </div>
+                ) : (
+                  "–"
+                )}
               </td>
             );
           }
