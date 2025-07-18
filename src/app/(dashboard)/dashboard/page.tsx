@@ -134,6 +134,7 @@ export default function DashboardPageV2() {
           bullMatrix={bullMatrix}
           bearMatrix={bearMatrix}
           priceByDate={priceByDate}
+          underlyingCode={filters.underlying || ulCode}
         />
       ) : (
         <div className="mt-6 text-center text-gray-500">

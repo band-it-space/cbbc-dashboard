@@ -14,6 +14,7 @@ type Props = {
   bullMatrix: Record<string, Record<string, AggregatedCell>>;
   bearMatrix: Record<string, Record<string, AggregatedCell>>;
   priceByDate: Record<string, number>;
+  underlyingCode: string;
 };
 
 export default function CBBCMatrixTable({
@@ -24,6 +25,7 @@ export default function CBBCMatrixTable({
   bullMatrix,
   bearMatrix,
   priceByDate,
+  underlyingCode,
 }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const currentPrice = priceByDate[activeDate] ?? 0;
@@ -95,6 +97,7 @@ export default function CBBCMatrixTable({
                 onToggle={() => toggleRow(range, "Bear")}
                 maxNotional={maxNotional}
                 maxQuantity={maxQuantity}
+                underlyingCode={underlyingCode}
               />
             </Fragment>
           ))}
@@ -106,6 +109,7 @@ export default function CBBCMatrixTable({
                 bullTotal={bullTotal}
                 bearTotal={bearTotal}
                 currentPrice={currentPrice}
+                underlyingCode={underlyingCode}
               />
             </td>
           </tr>
@@ -123,6 +127,7 @@ export default function CBBCMatrixTable({
                 onToggle={() => toggleRow(range, "Bull")}
                 maxNotional={maxNotional}
                 maxQuantity={maxQuantity}
+                underlyingCode={underlyingCode}
               />
             </Fragment>
           ))}
