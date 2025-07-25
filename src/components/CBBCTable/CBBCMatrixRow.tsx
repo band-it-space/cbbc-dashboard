@@ -37,7 +37,7 @@ type Props = {
   isExpanded: boolean;
   onToggle: (range: string) => void;
   maxNotional: number;
-  maxQuantity: number;
+  maxShares: number; // Это теперь maxShares
   underlyingCode: string;
 };
 
@@ -50,7 +50,7 @@ export default function CBBCMatrixRow({
   isExpanded,
   onToggle,
   maxNotional,
-  maxQuantity,
+  maxShares,
   underlyingCode,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
@@ -134,7 +134,9 @@ export default function CBBCMatrixRow({
                 <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                   <div
                     className={`h-8 bg-gray-300`}
-                    style={{ width: `${(cell.quantity / maxQuantity) * 100}%` }}
+                    style={{
+                      width: `${(cell.quantity / maxShares) * 100}%`,
+                    }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
                     {toAbbreviatedNumber(cell.quantity)}

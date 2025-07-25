@@ -46,7 +46,7 @@ export default function CBBCMatrixTable({
     );
   }, [rangeList, dateList, bullMatrix, bearMatrix]);
 
-  const maxQuantity = useMemo(() => {
+  const maxShares = useMemo(() => {
     return Math.max(
       ...rangeList.flatMap((range) => [
         ...dateList.map((date) => bullMatrix[range]?.[date]?.quantity || 0),
@@ -96,7 +96,7 @@ export default function CBBCMatrixTable({
                 isExpanded={expandedRows[`${range}-Bear`] || false}
                 onToggle={() => toggleRow(range, "Bear")}
                 maxNotional={maxNotional}
-                maxQuantity={maxQuantity}
+                maxShares={maxShares}
                 underlyingCode={underlyingCode}
               />
             </Fragment>
@@ -126,7 +126,7 @@ export default function CBBCMatrixTable({
                 isExpanded={expandedRows[`${range}-Bull`] || false}
                 onToggle={() => toggleRow(range, "Bull")}
                 maxNotional={maxNotional}
-                maxQuantity={maxQuantity}
+                maxShares={maxShares}
                 underlyingCode={underlyingCode}
               />
             </Fragment>

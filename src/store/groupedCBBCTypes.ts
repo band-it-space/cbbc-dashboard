@@ -48,7 +48,7 @@ export interface GroupedCBBCStore {
 
 export interface AggregatedCell {
   notional: number;
-  quantity: number;
+  quantity: number; // Теперь содержит shares_number
   shares: number;
   codes: string[];
   items: GroupedCBBCEntry[];
