@@ -66,7 +66,7 @@ export function useCBBCMatrixData(
         }
         const cell = matrix[range][date][type as "Bull" | "Bear"];
         cell.notional += cbcc.notional;
-        cell.quantity += cbcc.quantity;
+        cell.quantity += cbcc.shares_number; // Используем shares_number вместо quantity
         cell.shares += cbcc.shares_number;
         cell.codes.push(cbcc.code);
         cell.items.push({ ...cbcc, date });
