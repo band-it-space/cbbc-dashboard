@@ -55,7 +55,7 @@ export function formatUnderlyingCode(code: string): string {
 }
 
 // Константы для конвертации валют
-const HKD_TO_USD_RATE = 0.13;
+const HKD_TO_USD_RATE = 0.1273;
 const INDEX_MULTIPLIER = 50;
 
 // Список кодов индексов
