@@ -24,17 +24,3 @@ export function useUnderlyingsQuery() {
 
   return query;
 }
-
-export async function fetchAvailableDates(ul: string): Promise<string[]> {
-  const res = await fetch(`/api/cbbc/last-dates?ul=${ul}`);
-  if (!res.ok) throw new Error("Failed to fetch available dates");
-  return res.json();
-}
-
-export function useAvailableDatesQuery(ul: string) {
-  return useQuery({
-    queryKey: ["available-dates", ul],
-    queryFn: () => fetchAvailableDates(ul),
-    enabled: !!ul,
-  });
-}
