@@ -7,10 +7,7 @@ import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { useGroupedCBBCQuery } from "@/hooks/useGroupedCBBCQuery";
 import CBBCMatrixTable from "@/components/CBBCTable/GroupedCBBCMetricsMatrix";
 import { useCBBCMatrixData } from "@/hooks/useCBBCMatrixData";
-import {
-  useUnderlyingsQuery,
-  useAvailableDatesQuery,
-} from "@/hooks/useUnderlyingsQuery";
+import { useUnderlyingsQuery } from "@/hooks/useUnderlyingsQuery";
 
 export default function DashboardPageV2() {
   const { filters, setFilters, setDate, date, groupedRawData, issuers } =
@@ -40,20 +37,14 @@ export default function DashboardPageV2() {
 
   const ulCode =
     filters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
-  const { data: availableDatesRaw } = useAvailableDatesQuery(ulCode);
-  const availableDates = useMemo(() => {
-    return Array.isArray(availableDatesRaw) ? availableDatesRaw : [];
-  }, [availableDatesRaw]);
 
   useEffect(() => {
-    if (availableDates.length > 0 && !date) {
-      const firstDate = availableDates[0];
-      if (firstDate) {
-        setDate(firstDate);
-        setTimeout(() => refetch(), 0);
-      }
+    if (!date) {
+      const yesterday = getYesterday();
+      setDate(yesterday);
+      setTimeout(() => refetch(), 0);
     }
-  }, [availableDates, date, setDate, refetch]);
+  }, [date, setDate, refetch]);
 
   const handleApplyFilters = async () => {
     await refetch();

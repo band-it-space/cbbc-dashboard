@@ -1,12 +1,7 @@
 import { Filters } from "@/store/types";
 import { useMemo, useState, useEffect } from "react";
-import { useAvailableDatesQuery } from "@/hooks/useUnderlyingsQuery";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
-import {
-  formatDateHuman,
-  getSortedUnderlyings,
-  formatUnderlyingCode,
-} from "@/lib/utils";
+import { getSortedUnderlyings, formatUnderlyingCode } from "@/lib/utils";
 
 export type Underlying = {
   code: string;
@@ -31,24 +26,6 @@ export default function FiltersPanel({
   const date = useGroupedCBBCStore((s) => s.date);
   const setDate = useGroupedCBBCStore((s) => s.setDate);
   const setFilters = useGroupedCBBCStore((s) => s.setFilters);
-
-  const ul =
-    localFilters.underlying ||
-    (underlyings[0] ? formatUnderlyingCode(underlyings[0].code) : "");
-  const { data: availableDatesRaw, isLoading: isDatesLoading } =
-    useAvailableDatesQuery(ul);
-  const availableDates: string[] = Array.isArray(availableDatesRaw)
-    ? availableDatesRaw
-    : [];
-
-  useEffect(() => {
-    if (availableDates.length > 0 && !localFilters.date) {
-      const lastDate = availableDates[0];
-      const updated = { ...localFilters, date: lastDate };
-      updateLocalFilters(updated);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableDates]);
 
   useEffect(() => {
     updateLocalFilters(filters);
@@ -90,19 +67,12 @@ export default function FiltersPanel({
         {/* Date Select */}
         <div>
           <label className="block text-sm text-gray-600 mb-1">Date</label>
-          <select
+          <input
+            type="date"
             value={date || ""}
             onChange={(e) => setDate(e.target.value || null)}
             className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
-            disabled={isDatesLoading || availableDates.length === 0}
-          >
-            <option value="">Select Date</option>
-            {availableDates.map((date: string) => (
-              <option key={date} value={date}>
-                {formatDateHuman(date)}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Group Step */}
