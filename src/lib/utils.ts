@@ -50,8 +50,8 @@ export function formatUnderlyingCode(code: string): string {
   if (/[A-Z]/.test(code)) {
     return code;
   }
-  // Для цифровых кодов добавляем нули до 5 символов
-  return code.padStart(5, "0");
+  // Для цифровых кодов добавляем нули до 4 символов
+  return code.padStart(4, "0");
 }
 
 // Константы для конвертации валют
