@@ -35,8 +35,8 @@ export const useGroupedCBBCStore = create<GroupedCBBCStore>((set) => ({
   filters: {
     from: undefined,
     to: undefined,
-    range: 2,
-    underlying: "01211",
+    range: 5,
+    underlying: "9988",
     grouping: true,
     issuers: [],
   },
