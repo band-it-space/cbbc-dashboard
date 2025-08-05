@@ -55,6 +55,21 @@ export default function CBBCMatrixRow({
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
   console.log("matrix", matrix);
+  console.log("range", range, "dateList", dateList);
+  console.log("activeDate", activeDate);
+
+  // Проверяем, есть ли данные хотя бы за одну дату
+  const hasAnyData = dateList.some((date) => {
+    const cell = cellForDate(date);
+    return cell && cell.notional > 0;
+  });
+
+  console.log(`Диапазон ${range} имеет данные:`, hasAnyData);
+
+  // Если нет данных ни за одну дату, не показываем строку
+  if (!hasAnyData) {
+    return null;
+  }
 
   return (
     <Fragment>
@@ -68,90 +83,89 @@ export default function CBBCMatrixRow({
 
         {dateList.map((date, idx) => {
           const cell = cellForDate(date);
+
           if (idx === 0) {
-            if (
-              !cell ||
-              (cell.notional === 0 &&
-                cell.quantity === 0 &&
-                cell.codes.length === 0)
-            ) {
+            // Для активной даты (первой даты)
+            if (!cell || cell.notional === 0) {
+              // Если нет данных в активной дате, показываем прочерки
               return (
                 <Fragment key={`${range}-${date}-empty-active`}>
-                  <td
-                    className={`p-1 text-center bg-white border border-gray-300`}
-                  >
+                  <td className="p-1 text-center bg-white border border-gray-300">
                     –
                   </td>
-                  <td
-                    className={`p-1 text-center bg-white border border-gray-300`}
-                  >
+                  <td className="p-1 text-center bg-white border border-gray-300">
                     –
                   </td>
-                  <td
-                    className={`p-1 text-center bg-white border border-gray-300`}
-                  >
+                  <td className="p-1 text-center bg-white border border-gray-300">
                     –
                   </td>
                 </Fragment>
               );
-            }
-            const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
-            const { hkd, usd } = formatCurrencyPair(
-              cell.notional,
-              underlyingCode
-            );
-            return (
-              <Fragment key={`${range}-${date}-active`}>
-                <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
-                  <div
-                    className={`h-8 ${
-                      bearFirst ? "bg-red-400" : "bg-green-400"
-                    }`}
-                    style={{ width: `${(cell.notional / maxNotional) * 100}%` }}
-                  ></div>
-                  <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
-                    <div className="flex items-center gap-1">
-                      <div className="flex flex-col">
-                        <span>{hkd} HKD</span>
-                        <span className="text-gray-600">{usd} USD</span>
+            } else {
+              // Если есть данные в активной дате, показываем их
+              const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
+              const { hkd, usd } = formatCurrencyPair(
+                cell.notional,
+                underlyingCode
+              );
+
+              return (
+                <Fragment key={`${range}-${date}-active`}>
+                  <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
+                    <div
+                      className={`h-8 ${
+                        bearFirst ? "bg-red-400" : "bg-green-400"
+                      }`}
+                      style={{
+                        width: `${(cell.notional / maxNotional) * 100}%`,
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
+                      <div className="flex items-center gap-1">
+                        <div className="flex flex-col">
+                          <span>{hkd} HKD</span>
+                          <span className="text-gray-600">{usd} USD</span>
+                        </div>
+                        {prevDate && matrix[range]?.[prevDate]
+                          ? (() => {
+                              const prevNotional =
+                                matrix[range][prevDate].notional;
+                              const diff = cell.notional - prevNotional;
+                              if (diff === 0) return null;
+                              return (
+                                <span className="text-xs font-normal text-gray-500">
+                                  [{formatDiff(diff)}]
+                                </span>
+                              );
+                            })()
+                          : null}
                       </div>
-                      {prevDate && matrix[range]?.[prevDate]
-                        ? (() => {
-                            const prevNotional =
-                              matrix[range][prevDate].notional;
-                            const diff = cell.notional - prevNotional;
-                            if (diff === 0) return null;
-                            return (
-                              <span className="text-xs font-normal text-gray-500">
-                                [{formatDiff(diff)}]
-                              </span>
-                            );
-                          })()
-                        : null}
                     </div>
-                  </div>
-                </td>
-                <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
-                  <div
-                    className={`h-8 bg-gray-300`}
-                    style={{
-                      width: `${(cell.quantity / maxShares) * 100}%`,
-                    }}
-                  ></div>
-                  <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
-                    {toAbbreviatedNumber(cell.quantity)}
-                  </div>
-                </td>
-                <td className="p-1 text-center border border-gray-300 max-w-[200px] truncate bg-white">
-                  {cell.codes.join(", ")}
-                </td>
-              </Fragment>
-            );
+                  </td>
+                  <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
+                    <div
+                      className={`h-8 bg-gray-300`}
+                      style={{
+                        width: `${(cell.quantity / maxShares) * 100}%`,
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
+                      {toAbbreviatedNumber(cell.quantity)}
+                    </div>
+                  </td>
+                  <td className="p-1 text-center border border-gray-300 max-w-[200px] truncate bg-white">
+                    {cell.codes.join(", ")}
+                  </td>
+                </Fragment>
+              );
+            }
           } else if (idx > 0 && idx < 4) {
+            // Для остальных дат показываем данные, если они есть
             const { hkd, usd } = formatCurrencyPair(
               cell?.notional || 0,
               underlyingCode
             );
+
             return (
               <td
                 key={`${range}-${date}-total`}
@@ -160,7 +174,7 @@ export default function CBBCMatrixRow({
                   backgroundColor: getNotionalColor(cell?.notional || 0),
                 }}
               >
-                {cell ? (
+                {cell && cell.notional > 0 ? (
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold">{hkd}</span>
                     <span className="text-xs text-gray-600">{usd}</span>

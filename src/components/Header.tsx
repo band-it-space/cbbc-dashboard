@@ -33,6 +33,21 @@ export default function Header() {
           >
             Dashboard
           </Link>
+          <Link
+            href="/dashboard/ko-codes"
+            className="font-medium transition hover:underline"
+            style={{
+              color: "#4B5563",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563EB";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#4B5563";
+            }}
+          >
+            KO Codes
+          </Link>
         </nav>
       </div>
     </header>
