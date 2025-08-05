@@ -30,24 +30,42 @@ export function useCBBCMatrixData(
     const dates: string[] = [];
     const priceByDate: Record<string, number> = {};
 
+    // Сначала собираем все диапазоны и даты из данных
     for (const row of groupedRawData) {
       const { date, range, cbcc_list } = row;
-      // Фильтрация по диапазону дат
-      if (from && date < from) continue;
-      if (to && date > to) continue;
       ranges.add(range);
       if (!dates.includes(date)) dates.push(date);
 
       if (!priceByDate[date] && cbcc_list.length > 0) {
         priceByDate[date] = cbcc_list[0].ul_price;
       }
+    }
 
+    // Сортировка дат по убыванию (новые сверху)
+    const sortedDates = dates.sort((a, b) => b.localeCompare(a));
+
+    // Инициализируем матрицу для всех диапазонов и дат
+    for (const range of ranges) {
       if (!matrix[range]) matrix[range] = {};
-      if (!matrix[range][date]) {
-        matrix[range][date] = {
-          Bull: { notional: 0, quantity: 0, shares: 0, codes: [], items: [] },
-          Bear: { notional: 0, quantity: 0, shares: 0, codes: [], items: [] },
-        };
+      for (const date of sortedDates) {
+        if (!matrix[range][date]) {
+          matrix[range][date] = {
+            Bull: { notional: 0, quantity: 0, shares: 0, codes: [], items: [] },
+            Bear: { notional: 0, quantity: 0, shares: 0, codes: [], items: [] },
+          };
+        }
+      }
+    }
+
+    // Теперь заполняем матрицу данными с учетом фильтрации по датам
+    for (const row of groupedRawData) {
+      const { date, range, cbcc_list } = row;
+
+      // Фильтрация по диапазону дат применяется только к содержимому ячеек
+      const shouldIncludeDate = (!from || date >= from) && (!to || date <= to);
+
+      if (!shouldIncludeDate) {
+        continue;
       }
 
       // Фильтрация по выбранным эмитентам
@@ -73,9 +91,6 @@ export function useCBBCMatrixData(
       }
     }
 
-    // Сортировка дат по убыванию (новые сверху)
-    const sortedDates = dates.sort((a, b) => b.localeCompare(a));
-
     // Центрирование относительно цены
     const allRanges = Array.from(ranges);
     const parsed = allRanges
@@ -97,31 +112,6 @@ export function useCBBCMatrixData(
       .reverse();
 
     const finalRangeList = [...bear, ...bull];
-
-    // Обеспечиваем наличие пустых ячеек
-    for (const range of finalRangeList) {
-      if (!matrix[range]) matrix[range] = {};
-      for (const date of sortedDates) {
-        if (!matrix[range][date]) {
-          matrix[range][date] = {
-            Bull: {
-              notional: 0,
-              quantity: 0,
-              shares: 0,
-              codes: [],
-              items: [],
-            },
-            Bear: {
-              notional: 0,
-              quantity: 0,
-              shares: 0,
-              codes: [],
-              items: [],
-            },
-          };
-        }
-      }
-    }
 
     const bullMatrix: Record<string, Record<string, AggregatedCell>> = {};
     const bearMatrix: Record<string, Record<string, AggregatedCell>> = {};
