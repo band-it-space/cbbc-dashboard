@@ -51,7 +51,7 @@ export function formatUnderlyingCode(code: string): string {
     return code;
   }
   // Для цифровых кодов добавляем нули до 4 символов
-  return code.padStart(4, "0");
+  return code.padStart(5, "0");
 }
 
 // Константы для конвертации валют

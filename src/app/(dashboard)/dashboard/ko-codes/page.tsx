@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useKOQuery, KOQueryParams } from "@/hooks/useKOQuery";
 import { useUnderlyingsQuery } from "@/hooks/useUnderlyingsQuery";
 import KOFiltersPanel from "@/components/KOFiltersPanel";
+import CBBCDashboardStats from "@/components/CBBCDashboardStats";
 
 export default function KOCodesPage() {
   const [filters, setFilters] = useState<KOQueryParams>({
@@ -59,6 +60,12 @@ export default function KOCodesPage() {
           isFetching={isLoading}
         />
       </div>
+
+      <CBBCDashboardStats
+        issuerOptions={[]}
+        selectedIssuers={[]}
+        onIssuerChange={() => {}}
+      />
 
       {isLoading ? (
         <div className="bg-white rounded-lg shadow overflow-hidden">

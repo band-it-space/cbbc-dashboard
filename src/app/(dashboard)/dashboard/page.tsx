@@ -101,8 +101,6 @@ export default function DashboardPageV2() {
       </div>
 
       <CBBCDashboardStats
-        from={filters.from ?? undefined}
-        to={filters.to ?? undefined}
         issuerOptions={issuerOptions}
         selectedIssuers={filters.issuers || []}
         onIssuerChange={handleIssuerChange}
