@@ -117,8 +117,8 @@ export default function DashboardPageV2() {
               </h3>
             </div>
             <p className="text-center text-gray-600 mb-4">
-              This may take a few moments as we're processing a large amount of
-              data
+              This may take a few moments as we&apos;re processing a large
+              amount of data
             </p>
             <div className="flex justify-center space-x-2">
               <div className="animate-pulse bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
