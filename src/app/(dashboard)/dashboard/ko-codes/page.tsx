@@ -6,6 +6,7 @@ import { useKOQuery, KOQueryParams } from "@/hooks/useKOQuery";
 import { useUnderlyingsQuery } from "@/hooks/useUnderlyingsQuery";
 import KOFiltersPanel from "@/components/KOFiltersPanel";
 import CBBCDashboardStats from "@/components/CBBCDashboardStats";
+import { toAbbreviatedNumber, convertHKDToUSD } from "@/lib/utils";
 
 export default function KOCodesPage() {
   const [filters, setFilters] = useState<KOQueryParams>({
@@ -15,6 +16,23 @@ export default function KOCodesPage() {
 
   const { data: underlyings = [] } = useUnderlyingsQuery();
   const { data: koData = [], isLoading, error, refetch } = useKOQuery(filters);
+
+  // Функция для форматирования notional в HKD и USD
+  const formatNotional = (notional: number) => {
+    // Форматируем HKD с проверкой underlying
+    const hkdFormatted = toAbbreviatedNumber(notional);
+
+    // Конвертируем в USD с учетом типа underlying
+    const usdAmount = convertHKDToUSD(notional, filters.underlying || "HSI");
+    const usdFormatted = toAbbreviatedNumber(usdAmount);
+
+    return (
+      <div className="text-left">
+        <div className="font-medium">HK$ {hkdFormatted}</div>
+        <div className="text-xs text-gray-500">$ {usdFormatted}</div>
+      </div>
+    );
+  };
 
   const handleApplyFilters = async (newFilters: KOQueryParams) => {
     setFilters(newFilters);
@@ -92,6 +110,9 @@ export default function KOCodesPage() {
                     Quantity
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notional
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     UL Close
                   </th>
                 </tr>
@@ -116,6 +137,9 @@ export default function KOCodesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-4 bg-gray-200 rounded w-8"></div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-4 bg-gray-200 rounded w-20"></div>
@@ -155,6 +179,9 @@ export default function KOCodesPage() {
                     Quantity
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notional
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     UL Close
                   </th>
                 </tr>
@@ -187,6 +214,9 @@ export default function KOCodesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {certificate.quantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatNotional(certificate.notional)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {certificate.ul_close}
