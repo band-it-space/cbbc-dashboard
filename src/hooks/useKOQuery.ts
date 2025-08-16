@@ -7,6 +7,7 @@ export interface KOCertificate {
   call_level: string;
   os_percent: string;
   quantity: number;
+  notional: number;
   ul_open: string | null;
   ul_high: string;
   ul_low: string;
