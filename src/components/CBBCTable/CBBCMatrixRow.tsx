@@ -36,8 +36,6 @@ type Props = {
   prevDate?: string;
   isExpanded: boolean;
   onToggle: (range: string) => void;
-  maxNotional: number;
-  maxShares: number; // Это теперь maxShares
   underlyingCode: string;
 };
 
@@ -49,8 +47,6 @@ export default function CBBCMatrixRow({
   prevDate,
   isExpanded,
   onToggle,
-  maxNotional,
-  maxShares,
   underlyingCode,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
@@ -103,7 +99,6 @@ export default function CBBCMatrixRow({
               );
             } else {
               // Если есть данные в активной дате, показываем их
-              const bearFirst = cell.items.find((i) => i.bull_bear === "Bear");
               const { hkd, usd } = formatCurrencyPair(
                 cell.notional,
                 underlyingCode
@@ -111,16 +106,8 @@ export default function CBBCMatrixRow({
 
               return (
                 <Fragment key={`${range}-${date}-active`}>
-                  <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
-                    <div
-                      className={`h-8 ${
-                        bearFirst ? "bg-red-400" : "bg-green-400"
-                      }`}
-                      style={{
-                        width: `${(cell.notional / maxNotional) * 100}%`,
-                      }}
-                    ></div>
-                    <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
+                  <td className="p-1 border border-gray-300 min-w-[100px] text-center bg-white">
+                    <div className="flex flex-col items-center justify-center px-1 text-xs text-black font-semibold">
                       <div className="flex items-center gap-1">
                         <div className="flex flex-col">
                           <span>{hkd} HKD</span>
@@ -142,14 +129,8 @@ export default function CBBCMatrixRow({
                       </div>
                     </div>
                   </td>
-                  <td className="relative p-1 border border-gray-300 min-w-[100px] text-center bg-white">
-                    <div
-                      className={`h-8 bg-gray-300`}
-                      style={{
-                        width: `${(cell.quantity / maxShares) * 100}%`,
-                      }}
-                    ></div>
-                    <div className="absolute inset-0 flex items-center justify-center px-1 text-xs text-black font-semibold">
+                  <td className="p-1 border border-gray-300 min-w-[100px] text-center bg-white">
+                    <div className="flex items-center justify-center px-1 text-xs text-black font-semibold">
                       {toAbbreviatedNumber(cell.quantity)}
                     </div>
                   </td>

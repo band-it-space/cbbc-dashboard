@@ -34,7 +34,7 @@ export default function Header() {
             Dashboard
           </Link>
           <Link
-            href="/dashboard/ko-codes"
+            href="/ko-codes"
             className="font-medium transition hover:underline"
             style={{
               color: "#4B5563",
