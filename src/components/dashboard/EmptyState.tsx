@@ -57,7 +57,9 @@ export default function EmptyState({
     case "error":
       return (
         <div className="mt-6 bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-800">Error loading CBBC data: {error}</p>
+          <p className="text-red-800">
+            Error loading CBBC data for {underlying} on {displayDate}: {error}
+          </p>
         </div>
       );
 

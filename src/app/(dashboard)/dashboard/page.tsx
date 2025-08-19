@@ -23,6 +23,7 @@ export default function DashboardPageV2() {
     isFetching,
     isLoadingSingleDate,
     refetch,
+    groupedQueryError,
     filters,
     date,
     groupedRawData,
@@ -42,9 +43,6 @@ export default function DashboardPageV2() {
     setSingleDateSelectedIssuers,
     selectedIssuers,
   });
-
-  const ulCode =
-    filters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
 
   return (
     <div className="p-6">
@@ -82,7 +80,7 @@ export default function DashboardPageV2() {
         isFetching={isFetching}
         isLoadingSingleDate={isLoadingSingleDate}
         singleDateQueryError={singleDateQuery.error}
-        ulCode={ulCode}
+        groupedQueryError={groupedQueryError}
       />
     </div>
   );

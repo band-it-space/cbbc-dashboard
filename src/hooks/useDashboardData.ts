@@ -14,7 +14,11 @@ export function useDashboardData() {
 
   // External data queries
   const { data: underlyings = [] } = useUnderlyingsQuery();
-  const { isFetching, refetch } = useGroupedCBBCQuery();
+  const {
+    isFetching,
+    refetch,
+    error: groupedQueryError,
+  } = useGroupedCBBCQuery();
 
   // Single date query for when range = 0
   // Use filters.to for the query, not the local date state
@@ -159,6 +163,9 @@ export function useDashboardData() {
 
     // Actions
     refetch,
+
+    // Errors
+    groupedQueryError,
 
     // Store data
     filters,

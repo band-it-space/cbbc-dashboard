@@ -27,9 +27,7 @@ interface DashboardContentProps {
 
   // Query state
   singleDateQueryError?: any;
-
-  // Computed
-  ulCode: string;
+  groupedQueryError?: any;
 }
 
 /**
@@ -51,7 +49,7 @@ export default function DashboardContent({
   isFetching,
   isLoadingSingleDate,
   singleDateQueryError,
-  ulCode,
+  groupedQueryError,
 }: DashboardContentProps) {
   // Show loading state
   if ((isFetching && filters.range !== 0) || isLoadingSingleDate) {
@@ -87,7 +85,14 @@ export default function DashboardContent({
 
     // Show error state
     if (singleDateQueryError) {
-      return <EmptyState type="error" error={singleDateQueryError.message} />;
+      return (
+        <EmptyState
+          type="error"
+          error={singleDateQueryError.message}
+          underlying={filters.underlying || "HSI"}
+          date={filters.to || date}
+        />
+      );
     }
 
     // Show no data state (only after fetch)
@@ -108,26 +113,56 @@ export default function DashboardContent({
   }
 
   // Grouped mode (range !== 0)
-  if (
-    filters.range !== 0 &&
-    !isFetching &&
-    groupedRawData.length > 0 &&
-    filters.to
-  ) {
+  if (filters.range !== 0) {
+    // Show error state for grouped mode first
+    if (groupedQueryError) {
+      return (
+        <EmptyState
+          type="error"
+          error={groupedQueryError.message}
+          underlying={filters.underlying || "HSI"}
+          date={filters.to || date}
+        />
+      );
+    }
+
+    // Show loading state if fetching
+    if (isFetching) {
+      return <LoadingState isGroupedMode={true} />;
+    }
+
+    // Show grouped data if available
+    if (groupedRawData.length > 0 && filters.to) {
+      return (
+        <CBBCMatrixTable
+          rangeList={rangeList}
+          dateList={displayDateList}
+          activeDate={filters.to}
+          prevDate={prevDate}
+          bullMatrix={bullMatrix}
+          bearMatrix={bearMatrix}
+          priceByDate={priceByDate}
+          underlyingCode={filters.underlying || "HSI"}
+        />
+      );
+    }
+
+    // Show no data state for grouped mode
     return (
-      <CBBCMatrixTable
-        rangeList={rangeList}
-        dateList={displayDateList}
-        activeDate={filters.to}
-        prevDate={prevDate}
-        bullMatrix={bullMatrix}
-        bearMatrix={bearMatrix}
-        priceByDate={priceByDate}
-        underlyingCode={filters.underlying || ulCode}
+      <EmptyState
+        type="no-data"
+        underlying={filters.underlying || "HSI"}
+        date={filters.to || date}
       />
     );
   }
 
   // Default empty state
-  return <EmptyState type="no-data" />;
+  return (
+    <EmptyState
+      type="no-data"
+      underlying={filters.underlying || "HSI"}
+      date={filters.to || date}
+    />
+  );
 }
