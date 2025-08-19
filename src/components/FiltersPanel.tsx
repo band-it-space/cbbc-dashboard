@@ -1,5 +1,5 @@
 import { Filters } from "@/store/types";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { getSortedUnderlyings, formatUnderlyingCode } from "@/lib/utils";
 
@@ -7,6 +7,7 @@ export type Underlying = {
   code: string;
   name: string;
   type: string;
+  ranges: number[];
 };
 
 const PRIORITY_CODES = ["HSI", "HSCEI", "HSTEC", "700", "9988"];
@@ -19,7 +20,7 @@ export default function FiltersPanel({
 }: {
   filters: Filters;
   underlyings: Underlying[];
-  onApply: () => void;
+  onApply: (appliedFilters: Filters) => void;
   isFetching?: boolean;
 }) {
   const [localFilters, updateLocalFilters] = useState(filters);
@@ -31,10 +32,33 @@ export default function FiltersPanel({
     updateLocalFilters(filters);
   }, [filters]);
 
-  const handleChange = (field: keyof Filters, value: any) => {
-    const updated = { ...localFilters, [field]: value };
-    updateLocalFilters(updated);
-  };
+  const handleChange = useCallback(
+    (field: keyof Filters, value: any) => {
+      const updated = { ...localFilters, [field]: value };
+      updateLocalFilters(updated);
+      // No auto-apply - wait for user to click Apply button
+    },
+    [localFilters]
+  );
+
+  // Set default range to 0 (no grouping) when component mounts
+  useEffect(() => {
+    if (localFilters.range === undefined) {
+      handleChange("range", 0);
+    }
+  }, [localFilters.range, handleChange]);
+
+  // Set default underlying to HSI if not set
+  useEffect(() => {
+    if (!localFilters.underlying && underlyings.length > 0) {
+      const hsiUnderlying =
+        underlyings.find((u) => u.code === "HSI") || underlyings[0];
+      if (hsiUnderlying) {
+        const formattedCode = formatUnderlyingCode(hsiUnderlying.code);
+        handleChange("underlying", formattedCode);
+      }
+    }
+  }, [underlyings, localFilters.underlying, handleChange]);
 
   const sortedUnderlyings = useMemo(
     () => getSortedUnderlyings(underlyings, PRIORITY_CODES),
@@ -77,36 +101,48 @@ export default function FiltersPanel({
 
         {/* Group Step */}
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Group Step</label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                handleChange("range", (localFilters.range || 0) - 1)
-              }
-              className="px-3 py-2 bg-gray-200 text-gray-800 rounded"
-            >
-              –
-            </button>
-            <input
-              type="number"
-              min={0}
-              step="any"
-              value={localFilters.range ?? 0}
-              onChange={(e) =>
-                handleChange("range", parseFloat(e.target.value) || 0)
-              }
-              className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
-            />
-            <button
-              type="button"
-              onClick={() =>
-                handleChange("range", (localFilters.range || 0) + 1)
-              }
-              className="px-3 py-2 bg-gray-200 text-gray-800 rounded"
-            >
-              +
-            </button>
+          <label className="block text-sm text-gray-600 mb-1">
+            Call Level Range
+          </label>
+          <div className="flex flex-wrap gap-3">
+            {/* No Grouping Option */}
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="range"
+                value={0}
+                checked={localFilters.range === 0}
+                onChange={(e) =>
+                  handleChange("range", parseInt(e.target.value))
+                }
+                className="mr-2 text-blue-600"
+              />
+              <span className="text-sm text-gray-700">No grouping</span>
+            </label>
+
+            {/* Available Ranges */}
+            {localFilters.underlying &&
+              (() => {
+                const selectedUnderlying = underlyings.find(
+                  (u) =>
+                    formatUnderlyingCode(u.code) === localFilters.underlying
+                );
+                return selectedUnderlying?.ranges?.map((range) => (
+                  <label key={range} className="flex items-center">
+                    <input
+                      type="radio"
+                      name="range"
+                      value={range}
+                      checked={localFilters.range === range}
+                      onChange={(e) =>
+                        handleChange("range", parseFloat(e.target.value))
+                      }
+                      className="mr-2 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">{range}</span>
+                  </label>
+                ));
+              })()}
           </div>
         </div>
 
@@ -114,11 +150,14 @@ export default function FiltersPanel({
         <div className="flex">
           <button
             onClick={() => {
-              setFilters({
+              // Apply all filters including date
+              const appliedFilters = {
                 underlying: localFilters.underlying,
                 range: localFilters.range,
-              });
-              setTimeout(() => onApply(), 0);
+              };
+              setFilters(appliedFilters);
+              // Pass applied filters to onApply to trigger correct data fetch
+              onApply(appliedFilters);
             }}
             disabled={!!isFetching}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"

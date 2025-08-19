@@ -9,11 +9,18 @@ export default function CBBCDashboardStats({
   issuerOptions,
   selectedIssuers,
   onIssuerChange,
+  hasData = false,
 }: {
   issuerOptions: SelectOption[];
   selectedIssuers: string[];
   onIssuerChange: (values: string[]) => void;
+  hasData?: boolean;
 }) {
+  // Don't render if there's no data or no issuer options
+  if (!hasData || issuerOptions.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-white border rounded shadow p-6 mb-6">
       <div className="grid grid-cols-1 md:flex md:items-end md:justify-between gap-4 ">
