@@ -6,11 +6,11 @@ export async function GET(req: NextRequest) {
     const query = url.searchParams.toString();
 
     console.log(
-      `Proxying request to: http://13.230.195.0:8000/metrics/cbbc/cbbc/ko/?${query}`
+      `Proxying request to: http://52.195.141.129:8000/metrics/cbbc/cbbc/ko/?${query}`
     );
 
     const res = await fetch(
-      `http://13.230.195.0:8000/metrics/cbbc/cbbc/ko/?${query}`
+      `http://52.195.141.129:8000/metrics/cbbc/cbbc/ko/?${query}`
     );
 
     if (!res.ok) {
