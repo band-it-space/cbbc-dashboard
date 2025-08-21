@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = `http://13.230.195.0:8000/metrics/cbbc/single-date?underlying=${underlying}&target_date=${target_date}`;
+    const url = `http://52.195.141.129:8000/metrics/cbbc/single-date?underlying=${underlying}&target_date=${target_date}`;
     console.log("Fetching from external API:", url);
 
     const res = await fetch(url);
