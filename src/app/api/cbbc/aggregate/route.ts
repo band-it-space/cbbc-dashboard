@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const query = url.searchParams.toString();
 
   const res = await fetch(
-    `http://13.230.195.0:8000/metrics/cbbc/aggregate?${query}`
+    `http://52.195.141.129:8000/metrics/cbbc/aggregate?${query}`
   );
   if (!res.ok) {
     return new Response("Failed to fetch aggregated data", {
