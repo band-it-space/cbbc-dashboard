@@ -38,26 +38,24 @@ export default function EmptyState({
     case "filtered-no-data":
       return (
         <div className="mt-6 text-center text-gray-500">
-          <>
-            No CBBC data found for selected issuers (
-            {selectedIssuers.join(", ")}) for {underlying} on {displayDate}.
-          </>
+          No CBBC data found for selected issuers (
+          {selectedIssuers.join(", ")}) for {underlying} on {displayDate}.
         </div>
       );
 
     case "no-data":
       return (
         <div className="mt-6 text-center text-gray-500">
-          <>
-            No CBBC data found for {underlying} on {displayDate}.
-          </>
+          No CBBC data found for {underlying} on {displayDate}.
         </div>
       );
 
     case "error":
       return (
         <div className="mt-6 bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-800">Error loading CBBC data: {error}</p>
+          <p className="text-red-800">
+            Error loading CBBC data for {underlying} on {displayDate}: {error}
+          </p>
         </div>
       );
 

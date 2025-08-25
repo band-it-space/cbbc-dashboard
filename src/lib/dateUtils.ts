@@ -1,5 +1,10 @@
 /**
  * Утилитарные функции для работы с датами в торговых системах
+ *
+ * Особенности логики:
+ * - Выходные дни (суббота, воскресенье) автоматически отключаются
+ * - В понедельник автоматически загружаются данные за пятницу предыдущей недели
+ * - Все функции учитывают рабочие дни и исключают выходные
  */
 
 /**
@@ -7,31 +12,51 @@
  * Если сегодня воскресенье -> возвращает пятницу
  * Если сегодня суббота -> возвращает пятницу
  * Если сегодня пятница -> возвращает четверг
+ * Если сегодня понедельник -> возвращает пятницу предыдущей недели
  * Если сегодня будний день -> возвращает вчерашний день
  */
 export function getLastTradingDay(): string {
   const today = new Date();
-  const checkDate = new Date(today);
+  const currentDate = new Date(today);
 
-  // Начинаем с вчерашнего дня
-  checkDate.setDate(today.getDate() - 1);
-
-  // Продолжаем искать назад, пока не найдем рабочий день (понедельник-пятница)
-  while (checkDate.getDay() === 0 || checkDate.getDay() === 6) {
-    // 0 = воскресенье, 6 = суббота
-    checkDate.setDate(checkDate.getDate() - 1);
+  // Если сегодня понедельник (1), возвращаем пятницу предыдущей недели
+  if (currentDate.getDay() === 1) {
+    // Идем назад до пятницы (5)
+    while (currentDate.getDay() !== 5) {
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    return currentDate.toISOString().split("T")[0];
   }
 
-  return checkDate.toISOString().slice(0, 10);
+  // Если сегодня выходной, ищем предыдущий рабочий день
+  while (isWeekend(currentDate)) {
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+
+  return currentDate.toISOString().split("T")[0];
 }
 
 /**
  * Возвращает дату, которая на 2 дня раньше указанной даты
  * Используется для расчета диапазона дат (from - to)
+ * Учитывает рабочие дни (исключает выходные)
  */
 export function getFromDate(dateStr: string): string {
   const date = new Date(dateStr);
   date.setDate(date.getDate() - 2);
+
+  // Убеждаемся, что полученная дата не является выходным днем
+  while (isWeekend(date)) {
+    date.setDate(date.getDate() - 1);
+  }
+
+  // Если получилась дата понедельника, идем назад до пятницы предыдущей недели
+  if (date.getDay() === 1) {
+    while (date.getDay() !== 5) {
+      date.setDate(date.getDate() - 1);
+    }
+  }
+
   return date.toISOString().slice(0, 10);
 }
 
@@ -39,8 +64,7 @@ export function getFromDate(dateStr: string): string {
  * Проверяет, является ли день торговым (понедельник-пятница)
  */
 export function isTradingDay(date: Date): boolean {
-  const dayOfWeek = date.getDay();
-  return dayOfWeek >= 1 && dayOfWeek <= 5; // 1 = понедельник, 5 = пятница
+  return !isWeekend(date);
 }
 
 /**
@@ -48,4 +72,95 @@ export function isTradingDay(date: Date): boolean {
  */
 export function formatDisplayDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString();
+}
+
+/**
+ * Проверяет, является ли дата выходным днем (суббота или воскресенье)
+ */
+export function isWeekend(date: Date): boolean {
+  const day = date.getDay();
+  return day === 0 || day === 6; // 0 = воскресенье, 6 = суббота
+}
+
+/**
+ * Проверяет, является ли дата выходным днем по строке
+ */
+export function isWeekendString(dateString: string): boolean {
+  return isWeekend(new Date(dateString));
+}
+
+/**
+ * Получает следующий рабочий день
+ */
+export function getNextWorkday(date: Date): Date {
+  const nextDay = new Date(date);
+  nextDay.setDate(date.getDate() + 1);
+
+  while (isWeekend(nextDay)) {
+    nextDay.setDate(nextDay.getDate() + 1);
+  }
+
+  return nextDay;
+}
+
+/**
+ * Получает предыдущий рабочий день
+ */
+export function getPreviousWorkday(date: Date): Date {
+  const prevDay = new Date(date);
+  prevDay.setDate(date.getDate() - 1);
+
+  while (isWeekend(prevDay)) {
+    prevDay.setDate(prevDay.getDate() - 1);
+  }
+
+  return prevDay;
+}
+
+/**
+ * Получает последний рабочий день (сегодня или предыдущий рабочий день)
+ * Если сегодня понедельник -> возвращает пятницу предыдущей недели
+ * Если сегодня выходной -> возвращает предыдущий рабочий день
+ */
+export function getLastWorkday(): string {
+  const today = new Date();
+  const currentDate = new Date(today);
+
+  // Если сегодня понедельник (1), возвращаем пятницу предыдущей недели
+  if (currentDate.getDay() === 1) {
+    // Идем назад до пятницы (5)
+    while (currentDate.getDay() !== 5) {
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    return currentDate.toISOString().split("T")[0];
+  }
+
+  // Если сегодня выходной, ищем предыдущий рабочий день
+  while (isWeekend(currentDate)) {
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+
+  return currentDate.toISOString().split("T")[0];
+}
+
+/**
+ * Проверяет, является ли сегодня понедельником
+ */
+export function isMonday(): boolean {
+  const today = new Date();
+  return today.getDay() === 1; // 1 = понедельник
+}
+
+/**
+ * Проверяет, является ли дата понедельником
+ */
+export function isMondayDate(date: Date): boolean {
+  return date.getDay() === 1; // 1 = понедельник
+}
+
+/**
+ * Проверяет, можно ли выбрать дату (не выходной)
+ */
+export function shouldDisableDate(date: Date): boolean {
+  return isWeekend(date);
 }

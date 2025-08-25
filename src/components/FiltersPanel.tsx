@@ -2,6 +2,7 @@ import { Filters } from "@/store/types";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { getSortedUnderlyings, formatUnderlyingCode } from "@/lib/utils";
+import DatePicker from "./DatePicker";
 
 export type Underlying = {
   code: string;
@@ -26,7 +27,6 @@ export default function FiltersPanel({
   const [localFilters, updateLocalFilters] = useState(filters);
   const date = useGroupedCBBCStore((s) => s.date);
   const setDate = useGroupedCBBCStore((s) => s.setDate);
-  const setFilters = useGroupedCBBCStore((s) => s.setFilters);
 
   useEffect(() => {
     updateLocalFilters(filters);
@@ -90,12 +90,11 @@ export default function FiltersPanel({
 
         {/* Date Select */}
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Date</label>
-          <input
-            type="date"
-            value={date || ""}
-            onChange={(e) => setDate(e.target.value || null)}
-            className="w-full px-3 py-2 border border-blue-800 rounded text-gray-800"
+          <DatePicker
+            value={date}
+            onChange={setDate}
+            label="Date"
+            disabled={isFetching}
           />
         </div>
 
@@ -155,7 +154,6 @@ export default function FiltersPanel({
                 underlying: localFilters.underlying,
                 range: localFilters.range,
               };
-              setFilters(appliedFilters);
               // Pass applied filters to onApply to trigger correct data fetch
               onApply(appliedFilters);
             }}
