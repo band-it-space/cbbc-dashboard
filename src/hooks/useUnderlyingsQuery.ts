@@ -18,6 +18,7 @@ export function useUnderlyingsQuery() {
         setUnderlyings(data);
         return data;
       }),
+    retry: false, // Не повторяем запросы при ошибках
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });

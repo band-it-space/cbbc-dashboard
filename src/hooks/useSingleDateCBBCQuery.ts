@@ -56,6 +56,7 @@ export function useSingleDateCBBCQuery(
       return response.json();
     },
     enabled: enabled && !!params.underlying && !!params.target_date,
+    retry: false, // Не повторяем запросы при ошибках
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });

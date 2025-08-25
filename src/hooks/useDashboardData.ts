@@ -42,7 +42,7 @@ export function useDashboardData() {
   // Track when single date data has been successfully fetched
   useEffect(() => {
     if (
-      singleDateQuery.data &&
+      singleDateQuery.data !== undefined &&
       !singleDateQuery.isLoading &&
       !singleDateQuery.error
     ) {

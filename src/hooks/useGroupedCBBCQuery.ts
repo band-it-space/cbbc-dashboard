@@ -37,6 +37,7 @@ export const useGroupedCBBCQuery = () => {
     queryKey,
     queryFn: () => fetchGroupedCBBC(filters, date || ""),
     enabled: false,
+    retry: false, // Не повторяем запросы при ошибках
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });

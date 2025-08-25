@@ -27,6 +27,7 @@ interface DashboardContentProps {
 
   // Query state
   singleDateQueryError?: any;
+  singleDateQuery: any;
 
   // Computed
   ulCode: string;
@@ -51,6 +52,7 @@ export default function DashboardContent({
   isFetching,
   isLoadingSingleDate,
   singleDateQueryError,
+  singleDateQuery,
   ulCode,
 }: DashboardContentProps) {
   // Show loading state
@@ -90,8 +92,8 @@ export default function DashboardContent({
       return <EmptyState type="error" error={singleDateQueryError.message} />;
     }
 
-    // Show no data state (only after fetch)
-    if (hasFetchedSingleDate && filteredSingleDateData.length === 0) {
+    // Show no data state (after fetch with no data)
+    if (filteredSingleDateData.length === 0 && !singleDateQuery.isLoading) {
       return (
         <EmptyState
           type="no-data"

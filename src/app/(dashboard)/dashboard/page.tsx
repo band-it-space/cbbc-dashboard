@@ -82,6 +82,7 @@ export default function DashboardPageV2() {
         isFetching={isFetching}
         isLoadingSingleDate={isLoadingSingleDate}
         singleDateQueryError={singleDateQuery.error}
+        singleDateQuery={singleDateQuery}
         ulCode={ulCode}
       />
     </div>
