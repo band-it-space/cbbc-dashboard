@@ -12,6 +12,8 @@ export interface GroupedCBBCEntry {
   date: string;
   os_percent: number;
   last_price: number;
+  divisor: number;
+  type: "stock" | "index";
 }
 
 export interface GroupedBackendCBBC {

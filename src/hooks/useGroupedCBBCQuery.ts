@@ -12,7 +12,6 @@ async function fetchGroupedCBBC(
   const params = new URLSearchParams();
 
   if (underlying) {
-    // Форматируем underlying код правильно перед отправкой
     const formattedUnderlying = formatUnderlyingCode(underlying);
     params.append("ul", formattedUnderlying);
   }
@@ -43,7 +42,7 @@ export const useGroupedCBBCQuery = () => {
   });
 
   useEffect(() => {
-    if (query.data) {
+    if (query.data && Array.isArray(query.data)) {
       // Определяем диапазон дат из ответа
       const dates = query.data.map((row) => row.date).sort();
       if (dates.length > 0) {
@@ -60,8 +59,10 @@ export const useGroupedCBBCQuery = () => {
       // ⬇️ Собираем всех эмитентов из ответа
       const allIssuers = new Set<string>();
       for (const row of query.data) {
-        for (const item of row.cbcc_list) {
-          allIssuers.add(item.issuer);
+        if (Array.isArray(row.cbcc_list)) {
+          for (const item of row.cbcc_list) {
+            allIssuers.add(item.issuer);
+          }
         }
       }
 

@@ -24,6 +24,7 @@ type Item = {
 type AggregatedCell = {
   notional: number;
   quantity: number;
+  shares: number;
   codes: string[];
   items: Item[];
 };
@@ -95,6 +96,9 @@ export default function CBBCMatrixRow({
                   <td className="p-1 text-center bg-white border border-gray-300">
                     –
                   </td>
+                  <td className="p-1 text-center bg-white border border-gray-300">
+                    –
+                  </td>
                 </Fragment>
               );
             } else {
@@ -132,6 +136,11 @@ export default function CBBCMatrixRow({
                   <td className="p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                     <div className="flex items-center justify-center px-1 text-xs text-black font-semibold">
                       {toAbbreviatedNumber(cell.quantity)}
+                    </div>
+                  </td>
+                  <td className="p-1 border border-gray-300 min-w-[100px] text-center bg-white">
+                    <div className="flex items-center justify-center px-1 text-xs text-black font-semibold">
+                      {toAbbreviatedNumber(Math.round(cell.shares || 0))}
                     </div>
                   </td>
                   <td className="p-1 text-center border border-gray-300 max-w-[200px] truncate bg-white">
@@ -172,7 +181,7 @@ export default function CBBCMatrixRow({
 
       {isExpanded && matrix[range]?.[activeDate]?.items?.length > 0 && (
         <tr className="border-t bg-gray-100">
-          <td colSpan={1 + 3 + (dateList.length - 1)} className="p-2">
+          <td colSpan={1 + 4 + (dateList.length - 1)} className="p-2">
             <div className="flex flex-col gap-1">
               <div className="flex justify-start">
                 <button

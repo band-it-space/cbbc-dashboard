@@ -6,10 +6,10 @@ export async function GET(req: NextRequest) {
   const query = url.searchParams.toString();
 
   const res = await fetch(
-    `${config.backend.baseUrl}${config.backend.endpoints.cbbc}/aggregate?${query}`
+    `${config.backend.baseUrl}${config.backend.endpoints.ko}?${query}`
   );
   if (!res.ok) {
-    return new Response("Failed to fetch aggregated data", {
+    return new Response("Failed to fetch KO data", {
       status: res.status,
     });
   }

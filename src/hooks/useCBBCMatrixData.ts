@@ -5,12 +5,18 @@ import { useMemo } from "react";
 export function useCBBCMatrixData(
   from: string | undefined,
   to: string | undefined,
-  selectedIssuers: string[] = []
+  selectedIssuers: string[] = [],
+  underlyingCode?: string
 ) {
-  const { groupedRawData } = useGroupedCBBCStore();
+  const { groupedRawData, underlyings } = useGroupedCBBCStore();
+
+  const underlyingType = underlyingCode
+    ? underlyings.find((u) => u.code === underlyingCode)?.type
+    : undefined;
+  const isIndex = underlyingType === "index";
 
   const result = useMemo(() => {
-    if (!to) {
+    if (!to || !Array.isArray(groupedRawData)) {
       return {
         activeDate: to,
         rangeList: [],
@@ -30,9 +36,14 @@ export function useCBBCMatrixData(
     const dates: string[] = [];
     const priceByDate: Record<string, number> = {};
 
-    // Сначала собираем все диапазоны и даты из данных
     for (const row of groupedRawData) {
       const { date, range, cbcc_list } = row;
+
+      if (!Array.isArray(cbcc_list)) {
+        console.warn("cbcc_list is not an array:", cbcc_list);
+        continue;
+      }
+
       ranges.add(range);
       if (!dates.includes(date)) dates.push(date);
 
@@ -41,10 +52,8 @@ export function useCBBCMatrixData(
       }
     }
 
-    // Сортировка дат по убыванию (новые сверху)
     const sortedDates = dates.sort((a, b) => b.localeCompare(a));
 
-    // Инициализируем матрицу для всех диапазонов и дат
     for (const range of ranges) {
       if (!matrix[range]) matrix[range] = {};
       for (const date of sortedDates) {
@@ -57,24 +66,44 @@ export function useCBBCMatrixData(
       }
     }
 
-    // Теперь заполняем матрицу данными с учетом фильтрации по датам
     for (const row of groupedRawData) {
       const { date, range, cbcc_list } = row;
 
-      // Фильтрация по диапазону дат применяется только к содержимому ячеек
       const shouldIncludeDate = (!from || date >= from) && (!to || date <= to);
 
       if (!shouldIncludeDate) {
         continue;
       }
 
-      // Фильтрация по выбранным эмитентам
       const filteredList: GroupedCBBCEntry[] =
-        selectedIssuers.length > 0
+        Array.isArray(selectedIssuers) && selectedIssuers.length > 0
           ? cbcc_list.filter((cbcc: GroupedCBBCEntry) =>
               selectedIssuers.includes(cbcc.issuer)
             )
           : cbcc_list;
+
+      if (filteredList.length === 0) {
+        if (
+          !matrix[range][date].Bull.notional &&
+          !matrix[range][date].Bear.notional
+        ) {
+          matrix[range][date].Bull = {
+            notional: 0,
+            quantity: 0,
+            shares: 0,
+            codes: [],
+            items: [],
+          };
+          matrix[range][date].Bear = {
+            notional: 0,
+            quantity: 0,
+            shares: 0,
+            codes: [],
+            items: [],
+          };
+        }
+        continue;
+      }
 
       for (const cbcc of filteredList) {
         const type = cbcc.bull_bear?.trim();
@@ -82,16 +111,21 @@ export function useCBBCMatrixData(
         if (type !== "Bull" && type !== "Bear") {
           continue;
         }
+
         const cell = matrix[range][date][type as "Bull" | "Bear"];
         cell.notional += cbcc.notional;
-        cell.quantity += cbcc.shares_number; // Используем shares_number вместо quantity
-        cell.shares += cbcc.shares_number;
-        cell.codes.push(cbcc.code);
+        cell.quantity += cbcc.quantity;
+
+        const adjustedShares = isIndex
+          ? cbcc.shares_number / 50
+          : cbcc.shares_number;
+        cell.shares += Math.round(adjustedShares * 100) / 100;
+
+        cell.codes.push(cbcc.code.toString());
         cell.items.push({ ...cbcc, date });
       }
     }
 
-    // Центрирование относительно цены
     const allRanges = Array.from(ranges);
     const parsed = allRanges
       .map((r) => {
@@ -144,7 +178,7 @@ export function useCBBCMatrixData(
       bearMatrix,
       priceByDate,
     };
-  }, [groupedRawData, selectedIssuers, from, to]);
+  }, [groupedRawData, selectedIssuers, from, to, isIndex]);
 
   return result;
 }
