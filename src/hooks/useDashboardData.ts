@@ -21,7 +21,7 @@ export function useDashboardData() {
   const singleDateQuery = useSingleDateCBBCQuery(
     {
       underlying: filters.underlying || "HSI",
-      target_date: filters.to || getLastTradingDay(),
+      date: filters.to || getLastTradingDay(),
     },
     filters.range === 0 && !!filters.to // Only enable when range = 0 AND filters.to is set
   );
@@ -52,7 +52,8 @@ export function useDashboardData() {
 
   // Get issuers from single date data
   const singleDateIssuers = useMemo(() => {
-    if (!singleDateQuery.data) return [];
+    if (!singleDateQuery.data || !Array.isArray(singleDateQuery.data))
+      return [];
     const uniqueIssuers = [
       ...new Set(singleDateQuery.data.map((item) => item.issuer)),
     ];
@@ -61,7 +62,7 @@ export function useDashboardData() {
 
   // For single date mode, we don't filter by issuers (use global search instead)
   const filteredSingleDateData = useMemo(() => {
-    return singleDateQuery.data || [];
+    return Array.isArray(singleDateQuery.data) ? singleDateQuery.data : [];
   }, [singleDateQuery.data]);
 
   // Matrix data for grouped mode
@@ -71,7 +72,12 @@ export function useDashboardData() {
     bullMatrix,
     bearMatrix,
     priceByDate,
-  } = useCBBCMatrixData(filters.from, filters.to, filters.issuers || []);
+  } = useCBBCMatrixData(
+    filters.from,
+    filters.to,
+    filters.issuers || [],
+    filters.underlying
+  );
 
   // Computed display data
   const displayDateList = useMemo(() => {
@@ -94,16 +100,20 @@ export function useDashboardData() {
   const issuerOptions = useMemo(() => {
     if (filters.range === 0) {
       // Single date mode - use issuers from single date data
-      return singleDateIssuers.map((issuer) => ({
-        label: issuer,
-        value: issuer,
-      }));
+      return Array.isArray(singleDateIssuers)
+        ? singleDateIssuers.map((issuer) => ({
+            label: issuer,
+            value: issuer,
+          }))
+        : [];
     } else {
       // Grouped mode - use issuers from grouped data
-      return issuers.map((issuer) => ({
-        label: issuer,
-        value: issuer,
-      }));
+      return Array.isArray(issuers)
+        ? issuers.map((issuer) => ({
+            label: issuer,
+            value: issuer,
+          }))
+        : [];
     }
   }, [filters.range, singleDateIssuers, issuers]);
 

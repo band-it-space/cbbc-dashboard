@@ -22,7 +22,7 @@ export interface SingleDateCBBCItem {
 
 export interface SingleDateCBBCParams {
   underlying: string;
-  target_date: string;
+  date: string;
 }
 
 export function useSingleDateCBBCQuery(
@@ -35,8 +35,8 @@ export function useSingleDateCBBCQuery(
     queryParams.append("underlying", params.underlying);
   }
 
-  if (params.target_date) {
-    queryParams.append("target_date", params.target_date);
+  if (params.date) {
+    queryParams.append("target_date", params.date);
   }
 
   const queryString = queryParams.toString();
@@ -55,7 +55,7 @@ export function useSingleDateCBBCQuery(
       }
       return response.json();
     },
-    enabled: enabled && !!params.underlying && !!params.target_date,
+    enabled: enabled && !!params.underlying && !!params.date,
     retry: false, // Не повторяем запросы при ошибках
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

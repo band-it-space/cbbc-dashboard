@@ -1,7 +1,10 @@
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const underlying = searchParams.get("underlying");
-  const target_date = searchParams.get("target_date");
+import { NextRequest } from "next/server";
+import { config } from "@/lib/config";
+
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const underlying = url.searchParams.get("underlying");
+  const target_date = url.searchParams.get("target_date");
 
   console.log("Single date API called with:", { underlying, target_date });
 
@@ -16,7 +19,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = `http://52.195.141.129:8000/metrics/cbbc/single-date?underlying=${underlying}&target_date=${target_date}`;
+    const url = `${config.backend.baseUrl}${config.backend.endpoints.cbbc}/single-date?underlying=${underlying}&target_date=${target_date}`;
     console.log("Fetching from external API:", url);
 
     const res = await fetch(url);

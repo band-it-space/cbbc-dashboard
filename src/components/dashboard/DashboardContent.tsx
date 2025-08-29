@@ -3,6 +3,7 @@ import SmartSingleDateCBBCTable from "@/components/SmartSingleDateCBBCTable";
 import LoadingState from "./LoadingState";
 import EmptyState from "./EmptyState";
 import { formatDisplayDate } from "@/lib/dateUtils";
+import { useErrorNotification } from "@/hooks/useErrorNotification";
 
 interface DashboardContentProps {
   // Data
@@ -55,6 +56,8 @@ export default function DashboardContent({
   singleDateQuery,
   ulCode,
 }: DashboardContentProps) {
+  const { sendErrorNotification } = useErrorNotification();
+
   // Show loading state
   if ((isFetching && filters.range !== 0) || isLoadingSingleDate) {
     return <LoadingState isGroupedMode={filters.range !== 0} />;
@@ -89,7 +92,20 @@ export default function DashboardContent({
 
     // Show error state
     if (singleDateQueryError) {
-      return <EmptyState type="error" error={singleDateQueryError.message} />;
+      sendErrorNotification(
+        "/api/cbbc/single-date",
+        singleDateQueryError.message,
+        "Single date CBBC query failed"
+      );
+
+      return (
+        <EmptyState
+          type="error"
+          error={singleDateQueryError.message}
+          underlying={filters.underlying || "HSI"}
+          date={date || filters.to}
+        />
+      );
     }
 
     // Show no data state (after fetch with no data)

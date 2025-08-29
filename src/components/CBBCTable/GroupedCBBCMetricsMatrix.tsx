@@ -82,12 +82,15 @@ export default function CBBCMatrixTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border border-gray-300">
-        <CBBCMatrixHeader dateList={dateList} />
+        <CBBCMatrixHeader dateList={dateList} underlyingCode={underlyingCode} />
         <tbody>
           {/* Show More button for Bear ranges */}
           {shouldLimitBearRanges && !showAllBearRanges && (
             <tr>
-              <td colSpan={1 + dateList.length * 3} className="text-center p-2">
+              <td
+                colSpan={1 + 4 + (dateList.length - 1)}
+                className="text-center p-2"
+              >
                 <button
                   onClick={() => setShowAllBearRanges(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
@@ -102,7 +105,10 @@ export default function CBBCMatrixTable({
           {/* Show Less button for Bear ranges */}
           {shouldLimitBearRanges && showAllBearRanges && (
             <tr>
-              <td colSpan={1 + dateList.length * 3} className="text-center p-2">
+              <td
+                colSpan={1 + 4 + (dateList.length - 1)}
+                className="text-center p-2"
+              >
                 <button
                   onClick={() => setShowAllBearRanges(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
@@ -131,7 +137,7 @@ export default function CBBCMatrixTable({
 
           {/* Divider */}
           <tr>
-            <td colSpan={1 + dateList.length * 3}>
+            <td colSpan={1 + 4 + (dateList.length - 1)}>
               <CBBCMidSummary
                 bullTotal={bullTotal}
                 bearTotal={bearTotal}
@@ -170,7 +176,10 @@ export default function CBBCMatrixTable({
           {/* Show More button for Bull ranges */}
           {shouldLimitBullRanges && !showAllBullRanges && (
             <tr>
-              <td colSpan={1 + dateList.length * 3} className="text-center p-2">
+              <td
+                colSpan={1 + 4 + (dateList.length - 1)}
+                className="text-center p-2"
+              >
                 <button
                   onClick={() => setShowAllBullRanges(true)}
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
@@ -185,7 +194,10 @@ export default function CBBCMatrixTable({
           {/* Show Less button for Bull ranges */}
           {shouldLimitBullRanges && showAllBullRanges && (
             <tr>
-              <td colSpan={1 + dateList.length * 3} className="text-center p-2">
+              <td
+                colSpan={1 + 4 + (dateList.length - 1)}
+                className="text-center p-2"
+              >
                 <button
                   onClick={() => setShowAllBullRanges(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
