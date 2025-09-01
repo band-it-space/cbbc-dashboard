@@ -14,7 +14,6 @@ type Props = {
   bullMatrix: Record<string, Record<string, AggregatedCell>>;
   bearMatrix: Record<string, Record<string, AggregatedCell>>;
   priceByDate: Record<string, number>;
-  underlyingCode: string;
 };
 
 export default function CBBCMatrixTable({
@@ -25,7 +24,6 @@ export default function CBBCMatrixTable({
   bullMatrix,
   bearMatrix,
   priceByDate,
-  underlyingCode,
 }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [showAllBearRanges, setShowAllBearRanges] = useState(false);
@@ -82,7 +80,7 @@ export default function CBBCMatrixTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border border-gray-300">
-        <CBBCMatrixHeader dateList={dateList} underlyingCode={underlyingCode} />
+        <CBBCMatrixHeader dateList={dateList} />
         <tbody>
           {/* Show More button for Bear ranges */}
           {shouldLimitBearRanges && !showAllBearRanges && (
@@ -130,7 +128,6 @@ export default function CBBCMatrixTable({
                 prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bear`] || false}
                 onToggle={() => toggleRow(range, "Bear")}
-                underlyingCode={underlyingCode}
               />
             </Fragment>
           ))}
@@ -142,7 +139,6 @@ export default function CBBCMatrixTable({
                 bullTotal={bullTotal}
                 bearTotal={bearTotal}
                 currentPrice={currentPrice}
-                underlyingCode={underlyingCode}
                 hiddenBearRanges={
                   shouldLimitBearRanges && !showAllBearRanges
                     ? bearRanges.length - maxDisplayedRanges
@@ -168,7 +164,6 @@ export default function CBBCMatrixTable({
                 prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bull`] || false}
                 onToggle={() => toggleRow(range, "Bull")}
-                underlyingCode={underlyingCode}
               />
             </Fragment>
           ))}

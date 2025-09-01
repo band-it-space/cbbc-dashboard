@@ -29,9 +29,6 @@ interface DashboardContentProps {
   // Query state
   singleDateQueryError?: any;
   singleDateQuery: any;
-
-  // Computed
-  ulCode: string;
 }
 
 /**
@@ -54,7 +51,6 @@ export default function DashboardContent({
   isLoadingSingleDate,
   singleDateQueryError,
   singleDateQuery,
-  ulCode,
 }: DashboardContentProps) {
   const { sendErrorNotification } = useErrorNotification();
 
@@ -82,10 +78,7 @@ export default function DashboardContent({
             </p>
           </div>
 
-          <SmartSingleDateCBBCTable
-            data={filteredSingleDateData}
-            underlying={filters.underlying || "HSI"}
-          />
+          <SmartSingleDateCBBCTable data={filteredSingleDateData} />
         </div>
       );
     }
@@ -141,7 +134,6 @@ export default function DashboardContent({
         bullMatrix={bullMatrix}
         bearMatrix={bearMatrix}
         priceByDate={priceByDate}
-        underlyingCode={filters.underlying || ulCode}
       />
     );
   }

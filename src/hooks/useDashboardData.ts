@@ -72,12 +72,7 @@ export function useDashboardData() {
     bullMatrix,
     bearMatrix,
     priceByDate,
-  } = useCBBCMatrixData(
-    filters.from,
-    filters.to,
-    filters.issuers || [],
-    filters.underlying
-  );
+  } = useCBBCMatrixData(filters.from, filters.to, filters.issuers || []);
 
   // Computed display data
   const displayDateList = useMemo(() => {

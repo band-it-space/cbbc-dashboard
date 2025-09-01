@@ -1,16 +1,12 @@
 "use client";
 
 import { formatDateHuman } from "@/lib/utils";
-import { isIndexCode } from "@/lib/utils";
 
 export default function CBBCMatrixHeader({
   dateList,
-  underlyingCode,
 }: {
   dateList: string[];
-  underlyingCode: string;
 }) {
-  const equivalentLabel = isIndexCode(underlyingCode) ? "futures" : "shares";
 
   return (
     <thead>
@@ -38,7 +34,7 @@ export default function CBBCMatrixHeader({
           className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"
           style={{ minWidth: 80 }}
         >
-          Equivalent ({equivalentLabel})
+          Equivalent
         </th>
         <th
           className="p-2 border border-gray-300 bg-gray-50 text-center font-bold"

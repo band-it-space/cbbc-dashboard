@@ -5,15 +5,9 @@ import { useMemo } from "react";
 export function useCBBCMatrixData(
   from: string | undefined,
   to: string | undefined,
-  selectedIssuers: string[] = [],
-  underlyingCode?: string
+  selectedIssuers: string[] = []
 ) {
-  const { groupedRawData, underlyings } = useGroupedCBBCStore();
-
-  const underlyingType = underlyingCode
-    ? underlyings.find((u) => u.code === underlyingCode)?.type
-    : undefined;
-  const isIndex = underlyingType === "index";
+  const { groupedRawData } = useGroupedCBBCStore();
 
   const result = useMemo(() => {
     if (!to || !Array.isArray(groupedRawData)) {
@@ -116,10 +110,8 @@ export function useCBBCMatrixData(
         cell.notional += cbcc.notional;
         cell.quantity += cbcc.quantity;
 
-        const adjustedShares = isIndex
-          ? cbcc.shares_number / 50
-          : cbcc.shares_number;
-        cell.shares += Math.round(adjustedShares * 100) / 100;
+        // Используем shares_number как есть для всех типов
+        cell.shares += Math.round(cbcc.shares_number * 100) / 100;
 
         cell.codes.push(cbcc.code.toString());
         cell.items.push({ ...cbcc, date });
@@ -178,7 +170,7 @@ export function useCBBCMatrixData(
       bearMatrix,
       priceByDate,
     };
-  }, [groupedRawData, selectedIssuers, from, to, isIndex]);
+  }, [groupedRawData, selectedIssuers, from, to]);
 
   return result;
 }

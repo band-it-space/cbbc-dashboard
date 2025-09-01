@@ -5,7 +5,6 @@ interface Props {
   bullTotal: number;
   bearTotal: number;
   currentPrice: number;
-  underlyingCode: string;
   hiddenBearRanges?: number;
   hiddenBullRanges?: number;
 }
@@ -14,7 +13,6 @@ export default function CBBCMidSummary({
   bullTotal,
   bearTotal,
   currentPrice,
-  underlyingCode,
   hiddenBearRanges = 0,
   hiddenBullRanges = 0,
 }: Props) {
@@ -23,8 +21,8 @@ export default function CBBCMidSummary({
   const bearPercent = total ? ((bearTotal / total) * 100).toFixed(1) : "0";
   const ratio = bearTotal === 0 ? "∞" : (bullTotal / bearTotal).toFixed(1);
 
-  const bullCurrency = formatCurrencyPair(bullTotal, underlyingCode);
-  const bearCurrency = formatCurrencyPair(bearTotal, underlyingCode);
+  const bullCurrency = formatCurrencyPair(bullTotal);
+  const bearCurrency = formatCurrencyPair(bearTotal);
 
   return (
     <div className="flex items-center justify-center gap-6 bg-yellow-100 text-sm font-semibold py-2 rounded border border-yellow-300 col-span-full">
