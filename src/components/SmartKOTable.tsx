@@ -17,29 +17,25 @@ import { KOCertificate } from "@/hooks/useKOQuery";
 
 interface SmartKOTableProps {
   data: KOCertificate[];
-  underlying: string;
 }
 
-export default function SmartKOTable({ data, underlying }: SmartKOTableProps) {
+export default function SmartKOTable({ data }: SmartKOTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const formatNotional = useCallback(
-    (notional: number) => {
-      const hkdFormatted = toAbbreviatedNumber(notional);
-      const usdAmount = convertHKDToUSD(notional, underlying);
-      const usdFormatted = toAbbreviatedNumber(usdAmount);
+  const formatNotional = useCallback((notional: number) => {
+    const hkdFormatted = toAbbreviatedNumber(notional);
+    const usdAmount = convertHKDToUSD(notional);
+    const usdFormatted = toAbbreviatedNumber(usdAmount);
 
-      return (
-        <div className="text-left">
-          <div className="font-medium">HK$ {hkdFormatted}</div>
-          <div className="text-xs text-gray-500">$ {usdFormatted}</div>
-        </div>
-      );
-    },
-    [underlying]
-  );
+    return (
+      <div className="text-left">
+        <div className="font-medium">HK$ {hkdFormatted}</div>
+        <div className="text-xs text-gray-500">$ {usdFormatted}</div>
+      </div>
+    );
+  }, []);
 
   const columns: ColumnDef<KOCertificate>[] = useMemo(
     () => [

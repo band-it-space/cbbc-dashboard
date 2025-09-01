@@ -3,16 +3,14 @@ import { SingleDateCBBCItem } from "@/hooks/useSingleDateCBBCQuery";
 
 interface SingleDateCBBCTableProps {
   data: SingleDateCBBCItem[];
-  underlying: string;
 }
 
 export default function SingleDateCBBCTable({
   data,
-  underlying,
 }: SingleDateCBBCTableProps) {
   const formatNotional = (notional: number) => {
     const hkdFormatted = toAbbreviatedNumber(notional);
-    const usdAmount = convertHKDToUSD(notional, underlying);
+    const usdAmount = convertHKDToUSD(notional);
     const usdFormatted = toAbbreviatedNumber(usdAmount);
 
     return (

@@ -71,7 +71,7 @@ export default function KOCodesPage() {
           No knocked-out codes found.
         </div>
       ) : (
-        <SmartKOTable data={koData} underlying={filters.underlying || "HSI"} />
+        <SmartKOTable data={koData} />
       )}
     </div>
   );

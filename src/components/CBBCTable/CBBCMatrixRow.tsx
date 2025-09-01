@@ -37,7 +37,6 @@ type Props = {
   prevDate?: string;
   isExpanded: boolean;
   onToggle: (range: string) => void;
-  underlyingCode: string;
 };
 
 export default function CBBCMatrixRow({
@@ -48,7 +47,6 @@ export default function CBBCMatrixRow({
   prevDate,
   isExpanded,
   onToggle,
-  underlyingCode,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
   console.log("matrix", matrix);
@@ -104,8 +102,7 @@ export default function CBBCMatrixRow({
             } else {
               // Если есть данные в активной дате, показываем их
               const { hkd, usd } = formatCurrencyPair(
-                cell.notional,
-                underlyingCode
+                cell.notional
               );
 
               return (
@@ -152,8 +149,7 @@ export default function CBBCMatrixRow({
           } else if (idx > 0 && idx < 4) {
             // Для остальных дат показываем данные, если они есть
             const { hkd, usd } = formatCurrencyPair(
-              cell?.notional || 0,
-              underlyingCode
+              cell?.notional || 0
             );
 
             return (

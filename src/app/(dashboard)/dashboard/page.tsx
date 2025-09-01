@@ -43,9 +43,6 @@ export default function DashboardPageV2() {
     selectedIssuers,
   });
 
-  const ulCode =
-    filters.underlying || (underlyings[0]?.code.padStart(5, "0") ?? "");
-
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">CBBC Dashboard</h1>
@@ -83,7 +80,6 @@ export default function DashboardPageV2() {
         isLoadingSingleDate={isLoadingSingleDate}
         singleDateQueryError={singleDateQuery.error}
         singleDateQuery={singleDateQuery}
-        ulCode={ulCode}
       />
     </div>
   );

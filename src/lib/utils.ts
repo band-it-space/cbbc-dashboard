@@ -56,7 +56,6 @@ export function formatUnderlyingCode(code: string): string {
 
 // Константы для конвертации валют
 const HKD_TO_USD_RATE = 0.1273;
-const INDEX_MULTIPLIER = 50;
 
 // Список кодов индексов
 const INDEX_CODES = ["HSI", "HSCEI", "HSTEC", "HSTECH"];
@@ -71,30 +70,19 @@ export function isIndexCode(code: string): boolean {
 /**
  * Конвертирует HKD в USD с учетом типа актива
  */
-export function convertHKDToUSD(
-  hkdAmount: number,
-  underlyingCode: string
-): number {
-  if (isIndexCode(underlyingCode)) {
-    // Для индексов: сначала делим на 50, потом умножаем на курс
-    return (hkdAmount / INDEX_MULTIPLIER) * HKD_TO_USD_RATE;
-  } else {
-    // Для обычных активов: просто умножаем на курс
-    return hkdAmount * HKD_TO_USD_RATE;
-  }
+export function convertHKDToUSD(hkdAmount: number): number {
+  // Для всех типов активов: просто умножаем на курс
+  return hkdAmount * HKD_TO_USD_RATE;
 }
 
 /**
  * Форматирует валютную пару HKD/USD
  */
-export function formatCurrencyPair(
-  hkdAmount: number,
-  underlyingCode: string
-): {
+export function formatCurrencyPair(hkdAmount: number): {
   hkd: string;
   usd: string;
 } {
-  const usdAmount = convertHKDToUSD(hkdAmount, underlyingCode);
+  const usdAmount = convertHKDToUSD(hkdAmount);
   return {
     hkd: toAbbreviatedNumber(hkdAmount),
     usd: toAbbreviatedNumber(usdAmount),
