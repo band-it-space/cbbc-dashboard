@@ -33,15 +33,16 @@ export function useCBBCMatrixData(
     for (const row of groupedRawData) {
       const { date, range, cbcc_list } = row;
 
-      if (!Array.isArray(cbcc_list)) {
-        console.warn("cbcc_list is not an array:", cbcc_list);
-        continue;
-      }
-
+      // Всегда добавляем диапазон, даже если cbcc_list пустой
       ranges.add(range);
       if (!dates.includes(date)) dates.push(date);
 
-      if (!priceByDate[date] && cbcc_list.length > 0) {
+      // Получаем цену андерлайна, если есть данные
+      if (
+        !priceByDate[date] &&
+        Array.isArray(cbcc_list) &&
+        cbcc_list.length > 0
+      ) {
         priceByDate[date] = cbcc_list[0].ul_price;
       }
     }
@@ -69,14 +70,9 @@ export function useCBBCMatrixData(
         continue;
       }
 
-      const filteredList: GroupedCBBCEntry[] =
-        Array.isArray(selectedIssuers) && selectedIssuers.length > 0
-          ? cbcc_list.filter((cbcc: GroupedCBBCEntry) =>
-              selectedIssuers.includes(cbcc.issuer)
-            )
-          : cbcc_list;
-
-      if (filteredList.length === 0) {
+      // Обрабатываем случай, когда cbcc_list не является массивом или пустой
+      if (!Array.isArray(cbcc_list) || cbcc_list.length === 0) {
+        // Убеждаемся, что ячейки инициализированы с нулевыми значениями
         if (
           !matrix[range][date].Bull.notional &&
           !matrix[range][date].Bear.notional
@@ -96,6 +92,18 @@ export function useCBBCMatrixData(
             items: [],
           };
         }
+        continue;
+      }
+
+      const filteredList: GroupedCBBCEntry[] =
+        Array.isArray(selectedIssuers) && selectedIssuers.length > 0
+          ? cbcc_list.filter((cbcc: GroupedCBBCEntry) =>
+              selectedIssuers.includes(cbcc.issuer)
+            )
+          : cbcc_list;
+
+      if (filteredList.length === 0) {
+        // Если после фильтрации нет данных, оставляем ячейки с нулевыми значениями
         continue;
       }
 

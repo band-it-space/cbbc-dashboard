@@ -53,18 +53,8 @@ export default function CBBCMatrixRow({
   console.log("range", range, "dateList", dateList);
   console.log("activeDate", activeDate);
 
-  // Проверяем, есть ли данные хотя бы за одну дату
-  const hasAnyData = dateList.some((date) => {
-    const cell = cellForDate(date);
-    return cell && cell.notional > 0;
-  });
-
-  console.log(`Диапазон ${range} имеет данные:`, hasAnyData);
-
-  // Если нет данных ни за одну дату, не показываем строку
-  if (!hasAnyData) {
-    return null;
-  }
+  // Всегда показываем строку, даже если нет данных
+  // (пустые диапазоны должны отображаться с прочерками)
 
   return (
     <Fragment>
@@ -101,9 +91,7 @@ export default function CBBCMatrixRow({
               );
             } else {
               // Если есть данные в активной дате, показываем их
-              const { hkd, usd } = formatCurrencyPair(
-                cell.notional
-              );
+              const { hkd, usd } = formatCurrencyPair(cell.notional);
 
               return (
                 <Fragment key={`${range}-${date}-active`}>
@@ -148,9 +136,7 @@ export default function CBBCMatrixRow({
             }
           } else if (idx > 0 && idx < 4) {
             // Для остальных дат показываем данные, если они есть
-            const { hkd, usd } = formatCurrencyPair(
-              cell?.notional || 0
-            );
+            const { hkd, usd } = formatCurrencyPair(cell?.notional || 0);
 
             return (
               <td
