@@ -21,7 +21,6 @@ interface DashboardContentProps {
   filters: any;
   date?: string;
   hasFetchedSingleDate: boolean;
-  singleDateSelectedIssuers: string[];
 
   // Loading states
   isFetching: boolean;
@@ -47,7 +46,6 @@ export default function DashboardContent({
   filters,
   date,
   hasFetchedSingleDate,
-  singleDateSelectedIssuers,
   isFetching,
   isLoadingSingleDate,
   singleDateQueryError,
@@ -57,10 +55,7 @@ export default function DashboardContent({
   const lastErrorRef = useRef<string | null>(null);
 
   // Преобразуем single-date данные в матричный формат
-  const singleDateMatrixData = useSingleDateMatrixData(
-    filteredSingleDateData,
-    singleDateSelectedIssuers
-  );
+  const singleDateMatrixData = useSingleDateMatrixData(filteredSingleDateData);
 
   // Отправляем уведомление об ошибке только один раз
   useEffect(() => {

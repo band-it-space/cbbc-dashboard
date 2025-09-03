@@ -15,7 +15,6 @@ export default function DashboardPageV2() {
     singleDateQuery,
     hasFetchedSingleDate,
     setHasFetchedSingleDate,
-    singleDateSelectedIssuers,
     setSingleDateSelectedIssuers,
     issuerOptions,
     selectedIssuers,
@@ -75,7 +74,6 @@ export default function DashboardPageV2() {
         filters={filters}
         date={date || undefined}
         hasFetchedSingleDate={hasFetchedSingleDate}
-        singleDateSelectedIssuers={singleDateSelectedIssuers}
         isFetching={isFetching}
         isLoadingSingleDate={isLoadingSingleDate}
         singleDateQueryError={singleDateQuery.error}

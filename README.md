@@ -6,29 +6,33 @@ A comprehensive dashboard for monitoring and analyzing CBBC (Callable Bull/Bear 
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Git
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/band-it-space/cbbc-dashboard.git
    cd cbbc-dashboard
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env.local
    ```
-   
+
    Edit `.env.local` with your configuration:
+
    ```bash
    # Telegram Bot Configuration
    TELEGRAM_BOT_TOKEN=your_bot_token_here
@@ -45,6 +49,7 @@ A comprehensive dashboard for monitoring and analyzing CBBC (Callable Bull/Bear 
    ```
 
 4. **Start development server**
+
    ```bash
    npm run dev
    ```
@@ -131,6 +136,7 @@ cbbc-dashboard/
 ## 🏗️ Architecture Overview
 
 ### Frontend Stack
+
 - **Next.js 15** - React framework with App Router
 - **TypeScript** - Type safety and better DX
 - **Tailwind CSS** - Utility-first CSS framework
@@ -139,11 +145,13 @@ cbbc-dashboard/
 - **Material-UI** - UI components for date picker
 
 ### Backend Integration
+
 - **CORS Proxy** - Next.js API routes act as proxy to external backend
 - **HTTP Backend** - External API at `http://52.195.141.129:8000`
 - **Real-time Data** - Live CBBC and KO data updates
 
 ### Key Features
+
 - 📊 **CBBC Matrix Table** - Comprehensive view of CBBC data by ranges and dates
 - 🔍 **Advanced Filtering** - Filter by date, underlying, issuer, and range
 - 📈 **Single Date View** - Matrix-style view for specific dates with call levels
@@ -181,16 +189,16 @@ The app uses **Zustand** for global state management:
 // Store structure
 interface GroupedCBBCStore {
   // Data
-  groupedRawData: GroupedBackendCBBC[]
-  underlyings: Underlying[]
-  
+  groupedRawData: GroupedBackendCBBC[];
+  underlyings: Underlying[];
+
   // Filters
-  filters: Filters
-  date: string | null
-  
+  filters: Filters;
+  date: string | null;
+
   // Actions
-  setFilters: (filters: Filters) => void
-  setDate: (date: string | null) => void
+  setFilters: (filters: Filters) => void;
+  setDate: (date: string | null) => void;
   // ... more actions
 }
 ```
@@ -208,30 +216,30 @@ interface GroupedCBBCStore {
 
 ```typescript
 interface GroupedBackendCBBC {
-  date: string
-  range: string
-  count: number
-  outstanding_quantity: number
-  calculated_notional: number
-  shares: number
-  cbcc_list: GroupedCBBCEntry[]
-  total_processed: number
+  date: string;
+  range: string;
+  count: number;
+  outstanding_quantity: number;
+  calculated_notional: number;
+  shares: number;
+  cbcc_list: GroupedCBBCEntry[];
+  total_processed: number;
 }
 
 interface GroupedCBBCEntry {
-  code: string
-  call_level: number
-  quantity: number
-  notional: number
-  shares_number: number
-  ul_price: number
-  issuer: string
-  bull_bear: "Bull" | "Bear"
-  date: string
-  os_percent: number
-  last_price: number
-  divisor: number
-  type: "stock" | "index"
+  code: string;
+  call_level: number;
+  quantity: number;
+  notional: number;
+  shares_number: number;
+  ul_price: number;
+  issuer: string;
+  bull_bear: "Bull" | "Bear";
+  date: string;
+  os_percent: number;
+  last_price: number;
+  divisor: number;
+  type: "stock" | "index";
 }
 ```
 
@@ -239,32 +247,36 @@ interface GroupedCBBCEntry {
 
 ```typescript
 interface Underlying {
-  code: string
-  name: string
-  type: "stock" | "index"
-  ranges: number[]
+  code: string;
+  name: string;
+  type: "stock" | "index";
+  ranges: number[];
 }
 ```
 
 ## 🆕 Recent Updates
 
 ### Single Date Matrix View
+
 - **Matrix-style Display**: Single date data now displays in the same matrix format as grouped data
 - **Call Level Grouping**: Data is grouped by call levels instead of ranges
 - **Consistent UI**: Reuses the same matrix components for a unified experience
 - **Smart Data Processing**: New `useSingleDateMatrixData` hook transforms flat data into matrix format
 
 ### Enhanced Date Logic
+
 - **Smart Initial Date**: Automatically selects the last trading day on app load
 - **Weekend Handling**: Properly handles weekend and Monday scenarios
 - **Date Picker**: Material-UI date picker with weekend day disabling
 
 ### Error Handling Improvements
+
 - **Telegram Notifications**: Real-time error notifications with duplicate prevention
 - **Error Boundary**: Catches and reports frontend errors
 - **Null Safety**: Comprehensive null/undefined checks prevent crashes
 
 ### Data Structure Updates
+
 - **Unified Response Format**: Single date API now returns data in the same format as grouped data
 - **Enhanced Type Safety**: Updated TypeScript interfaces for better type checking
 - **Improved Performance**: Optimized data processing and rendering
@@ -287,15 +299,15 @@ The app proxies requests to the external backend:
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const query = url.searchParams.toString();
-  
+
   const res = await fetch(
     `${config.backend.baseUrl}${config.backend.endpoints.cbbc}/aggregate?${query}`
   );
-  
+
   if (!res.ok) {
     return new Response("Failed to fetch data", { status: res.status });
   }
-  
+
   const data = await res.json();
   return new Response(JSON.stringify(data), {
     headers: { "Content-Type": "application/json" },
@@ -397,6 +409,7 @@ NODE_ENV=production
 ### Development Workflow
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```

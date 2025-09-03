@@ -49,9 +49,6 @@ export default function CBBCMatrixRow({
   onToggle,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
-  console.log("matrix", matrix);
-  console.log("range", range, "dateList", dateList);
-  console.log("activeDate", activeDate);
 
   // Всегда показываем строку, даже если нет данных
   // (пустые диапазоны должны отображаться с прочерками)
