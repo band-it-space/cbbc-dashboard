@@ -50,9 +50,9 @@ A comprehensive dashboard for monitoring and analyzing CBBC (Callable Bull/Bear 
 
 4. **Start development server**
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
