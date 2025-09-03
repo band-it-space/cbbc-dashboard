@@ -169,9 +169,49 @@ export function useCBBCMatrixData(
       }
     }
 
+    // Проверяем knocked-out диапазоны (где Bull CBBC в bear секции или Bear CBBC в bull секции)
+    const knockedOutRanges = new Set<string>();
+
+    for (const range of finalRangeList) {
+      const rangeValue = parseFloat(range.split(" - ")[0]);
+      const isRangeAbovePrice = rangeValue >= refPrice;
+
+      for (const date of sortedDates) {
+        const bullCell = matrix[range]?.[date]?.Bull;
+        const bearCell = matrix[range]?.[date]?.Bear;
+
+        // Проверяем Bull CBBC в bear секции (выше цены)
+        if (
+          bullCell &&
+          (bullCell.notional > 0 ||
+            bullCell.quantity > 0 ||
+            bullCell.shares > 0) &&
+          isRangeAbovePrice
+        ) {
+          knockedOutRanges.add(range);
+        }
+
+        // Проверяем Bear CBBC в bull секции (ниже цены)
+        if (
+          bearCell &&
+          (bearCell.notional > 0 ||
+            bearCell.quantity > 0 ||
+            bearCell.shares > 0) &&
+          !isRangeAbovePrice
+        ) {
+          knockedOutRanges.add(range);
+        }
+      }
+    }
+
+    // Фильтруем диапазоны: скрываем только knocked-out, пустые диапазоны оставляем
+    const filteredRangeList = finalRangeList.filter(
+      (range) => !knockedOutRanges.has(range)
+    );
+
     return {
       activeDate: to,
-      rangeList: finalRangeList,
+      rangeList: filteredRangeList,
       dateList: sortedDates,
       matrix,
       bullMatrix,

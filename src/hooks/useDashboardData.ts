@@ -64,10 +64,25 @@ export function useDashboardData() {
     return uniqueIssuers.sort();
   }, [singleDateQuery.data]);
 
-  // For single date mode, we don't filter by issuers (use global search instead)
+  // Filter single date data by selected issuers
   const filteredSingleDateData = useMemo(() => {
-    return Array.isArray(singleDateQuery.data) ? singleDateQuery.data : [];
-  }, [singleDateQuery.data]);
+    if (!Array.isArray(singleDateQuery.data)) return [];
+
+    // If no issuers selected, return all data
+    if (!singleDateSelectedIssuers || singleDateSelectedIssuers.length === 0) {
+      return singleDateQuery.data;
+    }
+
+    // Filter data by selected issuers
+    return singleDateQuery.data
+      .map((item) => ({
+        ...item,
+        cbcc_list: item.cbcc_list.filter((entry) =>
+          singleDateSelectedIssuers.includes(entry.issuer)
+        ),
+      }))
+      .filter((item) => item.cbcc_list.length > 0);
+  }, [singleDateQuery.data, singleDateSelectedIssuers]);
 
   // Matrix data for grouped mode
   const {
@@ -123,17 +138,16 @@ export function useDashboardData() {
   // Loading states
   const isLoadingSingleDate = filters.range === 0 && singleDateQuery.isLoading;
 
-  // Determine if we have data to show issuer selector
-  // Only show for grouped mode, not for single date (which has global search)
+  // Determine if we have data to show issuer selector and legend
   const hasData = useMemo(() => {
     if (filters.range === 0) {
-      // Single date mode - don't show issuer selector (has global search instead)
-      return false;
+      // Single date mode - show if we have single date data
+      return filteredSingleDateData.length > 0;
     } else {
       // Grouped mode - check if we have grouped data
       return groupedRawData.length > 0;
     }
-  }, [filters.range, groupedRawData]);
+  }, [filters.range, filteredSingleDateData, groupedRawData]);
 
   return {
     // Data

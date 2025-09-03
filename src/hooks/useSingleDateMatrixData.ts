@@ -6,8 +6,7 @@ import { GroupedBackendCBBC, GroupedCBBCEntry } from "@/store/groupedCBBCTypes";
  * Преобразует single-date данные в формат, совместимый с группированными компонентами
  */
 export function useSingleDateMatrixData(
-  singleDateData: SingleDateCBBCItem[] | undefined,
-  selectedIssuers: string[] = []
+  singleDateData: SingleDateCBBCItem[] | undefined
 ) {
   const result = useMemo(() => {
     if (!singleDateData || !Array.isArray(singleDateData)) {
@@ -153,33 +152,42 @@ export function useSingleDateMatrixData(
         continue;
       }
 
-      const filteredList: GroupedCBBCEntry[] =
-        Array.isArray(selectedIssuers) && selectedIssuers.length > 0
-          ? cbcc_list.filter((cbcc: GroupedCBBCEntry) =>
-              selectedIssuers.includes(cbcc.issuer)
-            )
-          : cbcc_list;
-
-      if (filteredList.length === 0) {
-        // Если после фильтрации нет данных, оставляем ячейки с нулевыми значениями
-        continue;
-      }
-
-      for (const cbcc of filteredList) {
+      // Данные уже отфильтрованы в useDashboardData, используем cbcc_list как есть
+      for (const cbcc of cbcc_list) {
         const type = cbcc.bull_bear?.trim();
         if (!type || (type !== "Bull" && type !== "Bear")) {
           continue;
         }
 
-        const cell =
-          type === "Bull" ? bullMatrix[range][date] : bearMatrix[range][date];
-        cell.notional += cbcc.notional;
-        cell.quantity += cbcc.quantity;
-        // Используем shares_number как есть для всех типов
-        cell.shares += Math.round(cbcc.shares_number * 100) / 100;
+        // Определяем, в какую секцию должен попасть этот диапазон
+        const rangeValue = parseFloat(range);
+        const isRangeAbovePrice = rangeValue >= refPrice;
 
-        cell.codes.push(cbcc.code.toString());
-        cell.items.push({ ...cbcc, date });
+        // Определяем, в какую секцию должен попасть этот CBBC
+        const isCBBCBull = type === "Bull";
+
+        // CBBC попадает в матрицу только если:
+        // 1. Bull CBBC в диапазоне ниже цены (bull секция)
+        // 2. Bear CBBC в диапазоне выше цены (bear секция)
+        const shouldShowInBull = isCBBCBull && !isRangeAbovePrice;
+        const shouldShowInBear = !isCBBCBull && isRangeAbovePrice;
+
+        if (shouldShowInBull) {
+          const cell = bullMatrix[range][date];
+          cell.notional += cbcc.notional;
+          cell.quantity += cbcc.quantity;
+          cell.shares += Math.round(cbcc.shares_number * 100) / 100;
+          cell.codes.push(cbcc.code.toString());
+          cell.items.push({ ...cbcc, date });
+        } else if (shouldShowInBear) {
+          const cell = bearMatrix[range][date];
+          cell.notional += cbcc.notional;
+          cell.quantity += cbcc.quantity;
+          cell.shares += Math.round(cbcc.shares_number * 100) / 100;
+          cell.codes.push(cbcc.code.toString());
+          cell.items.push({ ...cbcc, date });
+        } else {
+        }
       }
     }
 
@@ -199,16 +207,47 @@ export function useSingleDateMatrixData(
       prevDate = sortedDates[1]; // Вторая дата - предыдущая
     }
 
+    // Создаем список диапазонов только с данными
+    const rangesWithData = new Set<string>();
+    for (const range of sortedRanges) {
+      for (const date of sortedDates) {
+        const bullCell = bullMatrix[range]?.[date];
+        const bearCell = bearMatrix[range]?.[date];
+
+        if (
+          bullCell &&
+          (bullCell.notional > 0 ||
+            bullCell.quantity > 0 ||
+            bullCell.shares > 0)
+        ) {
+          rangesWithData.add(range);
+        }
+        if (
+          bearCell &&
+          (bearCell.notional > 0 ||
+            bearCell.quantity > 0 ||
+            bearCell.shares > 0)
+        ) {
+          rangesWithData.add(range);
+        }
+      }
+    }
+
+    // Фильтруем диапазоны, оставляя только те, в которых есть данные
+    const filteredRanges = sortedRanges.filter((range) =>
+      rangesWithData.has(range)
+    );
+
     return {
       dateList: sortedDates,
       displayDateList,
       prevDate,
-      rangeList: sortedRanges,
+      rangeList: filteredRanges,
       bullMatrix,
       bearMatrix,
       priceByDate,
     };
-  }, [singleDateData, selectedIssuers]);
+  }, [singleDateData]);
 
   return result;
 }
