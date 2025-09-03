@@ -42,11 +42,11 @@ export default function SmartSingleDateCBBCTable({
   const columns: ColumnDef<SingleDateCBBCItem>[] = useMemo(
     () => [
       {
-        accessorKey: "cbbc_code",
+        accessorKey: "code",
         header: "CBBC Code",
         cell: ({ row }) => (
           <div className="font-medium text-gray-900">
-            {row.getValue("cbbc_code")}
+            {row.getValue("code")}
           </div>
         ),
       },
@@ -78,31 +78,40 @@ export default function SmartSingleDateCBBCTable({
         },
       },
       {
-        accessorKey: "call_level",
+        accessorKey: "range",
         header: "Call Level",
-        cell: ({ row }) => (
-          <div className="text-right">
-            {parseFloat(row.getValue("call_level")).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("range");
+          return (
+            <div className="text-right">
+              {value ? parseFloat(value as string).toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "strike_level",
         header: "Strike Level",
-        cell: ({ row }) => (
-          <div className="text-right">
-            {parseFloat(row.getValue("strike_level")).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("strike_level");
+          return (
+            <div className="text-right">
+              {value ? parseFloat(value as string).toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
-        accessorKey: "underlying_price",
+        accessorKey: "ul_price",
         header: "Underlying Price",
-        cell: ({ row }) => (
-          <div className="text-right">
-            {parseFloat(row.getValue("underlying_price")).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("ul_price");
+          return (
+            <div className="text-right">
+              {value ? parseFloat(value.toString()).toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "calculated_notional",
@@ -110,13 +119,16 @@ export default function SmartSingleDateCBBCTable({
         cell: ({ row }) => formatNotional(row.getValue("calculated_notional")),
       },
       {
-        accessorKey: "number_outstanding",
+        accessorKey: "outstanding_quantity",
         header: "Outstanding",
-        cell: ({ row }) => (
-          <div className="text-right">
-            {(row.getValue("number_outstanding") as number).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("outstanding_quantity") as number;
+          return (
+            <div className="text-right">
+              {value ? value.toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "os_percent",
@@ -137,15 +149,16 @@ export default function SmartSingleDateCBBCTable({
         ),
       },
       {
-        accessorKey: "entitlement_ratio",
-        header: "Entitlement Ratio",
-        cell: ({ row }) => (
-          <div className="text-right">
-            {parseFloat(
-              row.getValue("entitlement_ratio") as string
-            ).toLocaleString()}
-          </div>
-        ),
+        accessorKey: "shares",
+        header: "Shares",
+        cell: ({ row }) => {
+          const value = row.getValue("shares") as number;
+          return (
+            <div className="text-right">
+              {value ? value.toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "trading_currency",

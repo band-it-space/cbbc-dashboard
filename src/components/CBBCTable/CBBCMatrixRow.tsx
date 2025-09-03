@@ -193,7 +193,7 @@ export default function CBBCMatrixRow({
                       : "—"}
                     {" · "}
                     Conversion Ratio:{" "}
-                    {item.shares_number
+                    {item.shares_number && item.quantity
                       ? (item.quantity / item.shares_number).toLocaleString()
                       : "—"}
                   </span>

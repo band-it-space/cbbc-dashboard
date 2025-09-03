@@ -92,11 +92,14 @@ export default function SmartKOTable({ data }: SmartKOTableProps) {
       {
         accessorKey: "quantity",
         header: "Quantity",
-        cell: ({ row }) => (
-          <div className="text-right text-gray-500">
-            {(row.getValue("quantity") as number).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("quantity") as number;
+          return (
+            <div className="text-right text-gray-500">
+              {value ? value.toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "notional",
@@ -106,11 +109,14 @@ export default function SmartKOTable({ data }: SmartKOTableProps) {
       {
         accessorKey: "ul_close",
         header: "UL Close",
-        cell: ({ row }) => (
-          <div className="text-right text-gray-500">
-            {parseFloat(row.getValue("ul_close")).toLocaleString()}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const value = row.getValue("ul_close");
+          return (
+            <div className="text-right text-gray-500">
+              {value ? parseFloat(value as string).toLocaleString() : "—"}
+            </div>
+          );
+        },
       },
     ],
     [formatNotional]

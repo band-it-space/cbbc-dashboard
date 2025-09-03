@@ -55,7 +55,11 @@ export function useDashboardData() {
     if (!singleDateQuery.data || !Array.isArray(singleDateQuery.data))
       return [];
     const uniqueIssuers = [
-      ...new Set(singleDateQuery.data.map((item) => item.issuer)),
+      ...new Set(
+        singleDateQuery.data.flatMap((item) =>
+          item.cbcc_list.map((entry) => entry.issuer)
+        )
+      ),
     ];
     return uniqueIssuers.sort();
   }, [singleDateQuery.data]);
