@@ -2,7 +2,8 @@ export function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function toAbbreviatedNumber(value: number): string {
+export function toAbbreviatedNumber(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) return "0";
   if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + "B";
   if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + "M";
   if (value >= 1_000) return (value / 1_000).toFixed(1) + "K";
@@ -78,10 +79,13 @@ export function convertHKDToUSD(hkdAmount: number): number {
 /**
  * Форматирует валютную пару HKD/USD
  */
-export function formatCurrencyPair(hkdAmount: number): {
+export function formatCurrencyPair(hkdAmount: number | null | undefined): {
   hkd: string;
   usd: string;
 } {
+  if (hkdAmount == null || isNaN(hkdAmount)) {
+    return { hkd: "0", usd: "0" };
+  }
   const usdAmount = convertHKDToUSD(hkdAmount);
   return {
     hkd: toAbbreviatedNumber(hkdAmount),

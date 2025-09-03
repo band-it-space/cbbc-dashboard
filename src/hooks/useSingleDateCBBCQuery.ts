@@ -1,18 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 
 export interface SingleDateCBBCItem {
-  cbbc_code: number;
-  trade_date: string;
+  date: string;
   call_level: string;
-  os_percent: string;
-  number_outstanding: number;
-  total_issue_size: number;
+  count: number;
+  outstanding_quantity: number;
   calculated_notional: number;
-  shares_number: string;
-  underlying_price: string;
+  shares: number;
+  cbcc_list: SingleDateCBBCEntry[];
+}
+
+export interface SingleDateCBBCEntry {
+  range: string;
+  outstanding_quantity: number;
+  calculated_notional: number;
+  shares: number;
+  code: number;
+  os_percent: string;
+  ul_price: number;
+  last_price: string;
   bull_bear: "Bull" | "Bear";
   issuer: string;
-  entitlement_ratio: string;
+  divisor: string;
+  total_issue_size: number;
   cbbc_name: string;
   trading_currency: string;
   strike_level: string;

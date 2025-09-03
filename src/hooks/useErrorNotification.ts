@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 type Severity = "error" | "warning" | "info";
 
@@ -10,7 +10,18 @@ interface NotificationData {
 }
 
 export const useErrorNotification = () => {
+  const sentNotifications = useRef<Set<string>>(new Set());
+
   const sendNotification = useCallback(async (data: NotificationData) => {
+    // Создаем уникальный ключ для уведомления
+    const notificationKey = `${data.endpoint}-${data.error}-${data.severity}`;
+
+    // Проверяем, не отправляли ли мы уже это уведомление
+    if (sentNotifications.current.has(notificationKey)) {
+      console.log("Notification already sent, skipping:", notificationKey);
+      return true;
+    }
+
     try {
       const response = await fetch("/api/telegram/notify", {
         method: "POST",
@@ -20,9 +31,12 @@ export const useErrorNotification = () => {
 
       if (!response.ok) {
         console.error("Failed to send notification:", response.statusText);
+        return false;
       }
 
-      return response.ok;
+      // Помечаем уведомление как отправленное
+      sentNotifications.current.add(notificationKey);
+      return true;
     } catch (err) {
       console.error("Failed to send error notification:", err);
       return false;
@@ -55,10 +69,15 @@ export const useErrorNotification = () => {
     [sendNotification]
   );
 
+  const clearNotificationCache = useCallback(() => {
+    sentNotifications.current.clear();
+  }, []);
+
   return {
     sendNotification,
     sendErrorNotification,
     sendWarningNotification,
     sendInfoNotification,
+    clearNotificationCache,
   };
 };

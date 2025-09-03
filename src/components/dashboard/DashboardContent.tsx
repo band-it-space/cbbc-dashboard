@@ -1,9 +1,10 @@
 import CBBCMatrixTable from "@/components/CBBCTable/GroupedCBBCMetricsMatrix";
-import SmartSingleDateCBBCTable from "@/components/SmartSingleDateCBBCTable";
 import LoadingState from "./LoadingState";
 import EmptyState from "./EmptyState";
 import { formatDisplayDate } from "@/lib/dateUtils";
 import { useErrorNotification } from "@/hooks/useErrorNotification";
+import { useEffect, useRef } from "react";
+import { useSingleDateMatrixData } from "@/hooks/useSingleDateMatrixData";
 
 interface DashboardContentProps {
   // Data
@@ -46,13 +47,35 @@ export default function DashboardContent({
   filters,
   date,
   hasFetchedSingleDate,
-
+  singleDateSelectedIssuers,
   isFetching,
   isLoadingSingleDate,
   singleDateQueryError,
   singleDateQuery,
 }: DashboardContentProps) {
   const { sendErrorNotification } = useErrorNotification();
+  const lastErrorRef = useRef<string | null>(null);
+
+  // Преобразуем single-date данные в матричный формат
+  const singleDateMatrixData = useSingleDateMatrixData(
+    filteredSingleDateData,
+    singleDateSelectedIssuers
+  );
+
+  // Отправляем уведомление об ошибке только один раз
+  useEffect(() => {
+    if (
+      singleDateQueryError &&
+      singleDateQueryError.message !== lastErrorRef.current
+    ) {
+      lastErrorRef.current = singleDateQueryError.message;
+      sendErrorNotification(
+        "/api/cbbc/single-date",
+        singleDateQueryError.message,
+        "Single date CBBC query failed"
+      );
+    }
+  }, [singleDateQueryError, sendErrorNotification]);
 
   // Show loading state
   if ((isFetching && filters.range !== 0) || isLoadingSingleDate) {
@@ -61,42 +84,42 @@ export default function DashboardContent({
 
   // Single date mode (range = 0)
   if (filters.range === 0) {
-    // Show single date table with data
+    // Show single date matrix with data
     if (filteredSingleDateData.length > 0) {
       return (
         <div className="mt-6">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
               CBBC Data for {filters.underlying || "HSI"} on{" "}
-              {formatDisplayDate(date || filters.to || "")}
+              {formatDisplayDate(filters.to || date || "")}
             </h2>
             <p className="text-sm text-gray-600">
-              Showing {filteredSingleDateData.length} CBBC contracts
-              <span className="ml-2 text-blue-600">
-                (use search to filter data)
-              </span>
+              Showing {filteredSingleDateData.length} CBBC contracts by call
+              level
             </p>
           </div>
 
-          <SmartSingleDateCBBCTable data={filteredSingleDateData} />
+          <CBBCMatrixTable
+            rangeList={singleDateMatrixData.rangeList}
+            dateList={singleDateMatrixData.displayDateList || []}
+            activeDate={filters.to || date || ""}
+            prevDate={singleDateMatrixData.prevDate}
+            bullMatrix={singleDateMatrixData.bullMatrix}
+            bearMatrix={singleDateMatrixData.bearMatrix}
+            priceByDate={singleDateMatrixData.priceByDate}
+          />
         </div>
       );
     }
 
     // Show error state
     if (singleDateQueryError) {
-      sendErrorNotification(
-        "/api/cbbc/single-date",
-        singleDateQueryError.message,
-        "Single date CBBC query failed"
-      );
-
       return (
         <EmptyState
           type="error"
           error={singleDateQueryError.message}
           underlying={filters.underlying || "HSI"}
-          date={date || filters.to}
+          date={filters.to || date}
         />
       );
     }
@@ -139,5 +162,11 @@ export default function DashboardContent({
   }
 
   // Default empty state
-  return <EmptyState type="no-data" />;
+  return (
+    <EmptyState
+      type="no-data"
+      underlying={filters.underlying || "HSI"}
+      date={filters.to || date}
+    />
+  );
 }

@@ -30,13 +30,26 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   private async sendTelegramNotification(error: Error, errorInfo: any) {
     try {
+      // Clean up the stack trace to remove HTML tags and make it Telegram-friendly
+      const cleanComponentStack = errorInfo.componentStack
+        ?.replace(/<[^>]*>/g, "") // Remove HTML tags
+        ?.replace(/\s+/g, " ") // Normalize whitespace
+        ?.substring(0, 1000); // Limit length
+
+      const cleanErrorStack = error.stack
+        ?.replace(/<[^>]*>/g, "") // Remove HTML tags
+        ?.replace(/\s+/g, " ") // Normalize whitespace
+        ?.substring(0, 1000); // Limit length
+
       await fetch("/api/telegram/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           endpoint: "Client Error",
           error: error.message,
-          message: `Component Stack: ${errorInfo.componentStack}\nError Stack: ${error.stack}`,
+          message: `Component Stack: ${
+            cleanComponentStack || "N/A"
+          }\nError Stack: ${cleanErrorStack || "N/A"}`,
           severity: "error",
         }),
       });

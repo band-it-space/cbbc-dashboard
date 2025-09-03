@@ -3,6 +3,7 @@
 import { useGroupedCBBCStore } from "@/store/groupedCBBCStore";
 import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useSingleDateCBBCQuery } from "@/hooks/useSingleDateCBBCQuery";
 
 type CBBCItem = {
   code: string;
@@ -21,24 +22,61 @@ type CBBCItem = {
 
 export default function CBBCCodePage() {
   const { code } = useParams();
-  const { groupedRawData } = useGroupedCBBCStore();
+  const { groupedRawData, filters } = useGroupedCBBCStore();
 
   const router = useRouter();
 
+  // Получаем single-date данные для текущей даты
+  const singleDateQuery = useSingleDateCBBCQuery(
+    {
+      underlying: filters.underlying || "HSI",
+      date: filters.to || "",
+    },
+    !!filters.to
+  );
+
   const results = useMemo(() => {
-    if (!code || !groupedRawData.length) return [];
+    if (!code) return [];
 
-    return groupedRawData.flatMap((row) =>
-      row.cbcc_list
-        ?.filter((item: CBBCItem) => String(item.code) === String(code))
-        .map((item: CBBCItem) => ({
-          ...item,
-          date: row.date,
-        }))
-    );
-  }, [groupedRawData, code]);
+    // Сначала пробуем найти в grouped данных
+    if (groupedRawData.length > 0) {
+      return groupedRawData.flatMap((row) =>
+        row.cbcc_list
+          ?.filter((item: CBBCItem) => String(item.code) === String(code))
+          .map((item: CBBCItem) => ({
+            ...item,
+            date: row.date,
+          }))
+      );
+    }
 
-  if (groupedRawData.length === 0) {
+    // Если нет grouped данных, ищем в single-date данных
+    if (singleDateQuery.data && singleDateQuery.data.length > 0) {
+      return singleDateQuery.data.flatMap((item) =>
+        item.cbcc_list
+          .filter((entry) => String(entry.code) === String(code))
+          .map((entry) => ({
+            code: entry.code.toString(),
+            call_level: parseFloat(entry.range),
+            quantity: entry.outstanding_quantity,
+            notional: entry.calculated_notional,
+            shares_number: entry.shares,
+            ul_price: entry.ul_price,
+            bull_bear: entry.bull_bear,
+            issuer: entry.issuer,
+            date: item.date,
+            os_percent: parseFloat(entry.os_percent),
+            last_price: parseFloat(entry.last_price),
+          }))
+      );
+    }
+
+    return [];
+  }, [groupedRawData, singleDateQuery.data, code]);
+
+  const isLoading = groupedRawData.length === 0 && singleDateQuery.isLoading;
+
+  if (isLoading) {
     return <div className="p-6 text-gray-500">Loading...</div>;
   }
 
@@ -88,8 +126,12 @@ export default function CBBCCodePage() {
               <td className="p-2 border">{item.ul_price}</td>
               <td className="p-2 border">{item.last_price}</td>
               <td className="p-2 border">{item.os_percent}%</td>
-              <td className="p-2 border">{item.notional.toLocaleString()}</td>
-              <td className="p-2 border">{item.quantity.toLocaleString()}</td>
+              <td className="p-2 border">
+                {item.notional ? item.notional.toLocaleString() : "—"}
+              </td>
+              <td className="p-2 border">
+                {item.quantity ? item.quantity.toLocaleString() : "—"}
+              </td>
               <td className="p-2 border">
                 {item.shares_number ? item.shares_number.toLocaleString() : "—"}
               </td>
@@ -99,7 +141,7 @@ export default function CBBCCodePage() {
                   : "—"}
               </td>
               <td className="p-2 border">
-                {item.shares_number
+                {item.shares_number && item.quantity
                   ? (item.quantity / item.shares_number).toLocaleString()
                   : "—"}
               </td>
