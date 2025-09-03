@@ -21,6 +21,11 @@ export function useSingleDateMatrixData(
       };
     }
 
+    console.log("🔍 [useSingleDateMatrixData] Starting processing:", {
+      dataLength: singleDateData.length,
+      data: singleDateData,
+    });
+
     // Преобразуем single-date данные в формат GroupedBackendCBBC
     const groupedData: GroupedBackendCBBC[] = singleDateData.map((item) => {
       // Преобразуем cbcc_list в формат GroupedCBBCEntry
@@ -86,6 +91,13 @@ export function useSingleDateMatrixData(
     const refPrice =
       sortedDates.length > 0 ? priceByDate[sortedDates[0]] ?? 30 : 30;
 
+    console.log("💰 [useSingleDateMatrixData] Price analysis:", {
+      refPrice,
+      priceByDate,
+      sortedDates,
+      allRanges: parsed.map((r) => ({ range: r.key, value: r.from })),
+    });
+
     const bear = parsed
       .filter((r) => r.from >= refPrice)
       .map((r) => r.key)
@@ -96,6 +108,12 @@ export function useSingleDateMatrixData(
       .reverse();
 
     const sortedRanges = [...bear, ...bull];
+
+    console.log("📊 [useSingleDateMatrixData] Range categorization:", {
+      bear: bear.map((r) => ({ range: r, value: parseFloat(r) })),
+      bull: bull.map((r) => ({ range: r, value: parseFloat(r) })),
+      sortedRanges,
+    });
 
     // Создаем матрицы
     const bullMatrix: Record<string, Record<string, any>> = {};
@@ -156,6 +174,15 @@ export function useSingleDateMatrixData(
       for (const cbcc of cbcc_list) {
         const type = cbcc.bull_bear?.trim();
         if (!type || (type !== "Bull" && type !== "Bear")) {
+          console.log(
+            "⚠️ [useSingleDateMatrixData] Skipping CBBC with invalid type:",
+            {
+              code: cbcc.code,
+              type: cbcc.bull_bear,
+              range,
+              date,
+            }
+          );
           continue;
         }
 
@@ -186,7 +213,6 @@ export function useSingleDateMatrixData(
           cell.shares += Math.round(cbcc.shares_number * 100) / 100;
           cell.codes.push(cbcc.code.toString());
           cell.items.push({ ...cbcc, date });
-        } else {
         }
       }
     }
