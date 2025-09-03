@@ -95,6 +95,7 @@ cbbc-dashboard/
 │   │   ├── KOTableSkeleton.tsx      # KO table skeleton
 │   │   ├── Sidebar.tsx              # Navigation sidebar
 │   │   ├── SingleDateCBBCTable.tsx  # Single date table
+│   │   ├── SingleDateMatrixTable.tsx # Single date matrix table
 │   │   ├── SmartKOTable.tsx         # Enhanced KO table
 │   │   ├── SmartSingleDateCBBCTable.tsx # Enhanced single date table
 │   │   └── TabsPanel.tsx            # Tab navigation
@@ -107,6 +108,7 @@ cbbc-dashboard/
 │   │   ├── useGroupedCBBCQuery.ts   # Grouped CBBC queries
 │   │   ├── useKOQuery.ts            # Knock-out queries
 │   │   ├── useSingleDateCBBCQuery.ts # Single date queries
+│   │   ├── useSingleDateMatrixData.ts # Single date matrix data processing
 │   │   └── useUnderlyingsQuery.ts   # Underlying assets queries
 │   ├── lib/                         # Utility libraries
 │   │   ├── api.ts                   # API utilities
@@ -144,10 +146,11 @@ cbbc-dashboard/
 ### Key Features
 - 📊 **CBBC Matrix Table** - Comprehensive view of CBBC data by ranges and dates
 - 🔍 **Advanced Filtering** - Filter by date, underlying, issuer, and range
-- 📈 **Single Date View** - Detailed view for specific dates
+- 📈 **Single Date View** - Matrix-style view for specific dates with call levels
 - 🚨 **Error Monitoring** - Telegram notifications for system errors
 - 📱 **Responsive Design** - Works on desktop and mobile
 - ⚡ **Real-time Updates** - Live data refresh capabilities
+- 📅 **Smart Date Selection** - Automatic last trading day selection
 
 ## 🔧 Development
 
@@ -242,6 +245,29 @@ interface Underlying {
   ranges: number[]
 }
 ```
+
+## 🆕 Recent Updates
+
+### Single Date Matrix View
+- **Matrix-style Display**: Single date data now displays in the same matrix format as grouped data
+- **Call Level Grouping**: Data is grouped by call levels instead of ranges
+- **Consistent UI**: Reuses the same matrix components for a unified experience
+- **Smart Data Processing**: New `useSingleDateMatrixData` hook transforms flat data into matrix format
+
+### Enhanced Date Logic
+- **Smart Initial Date**: Automatically selects the last trading day on app load
+- **Weekend Handling**: Properly handles weekend and Monday scenarios
+- **Date Picker**: Material-UI date picker with weekend day disabling
+
+### Error Handling Improvements
+- **Telegram Notifications**: Real-time error notifications with duplicate prevention
+- **Error Boundary**: Catches and reports frontend errors
+- **Null Safety**: Comprehensive null/undefined checks prevent crashes
+
+### Data Structure Updates
+- **Unified Response Format**: Single date API now returns data in the same format as grouped data
+- **Enhanced Type Safety**: Updated TypeScript interfaces for better type checking
+- **Improved Performance**: Optimized data processing and rendering
 
 ## 🔌 API Integration
 
