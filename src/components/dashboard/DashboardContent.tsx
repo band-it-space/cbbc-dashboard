@@ -29,6 +29,7 @@ interface DashboardContentProps {
   // Query state
   singleDateQueryError?: any;
   singleDateQuery: any;
+  isIndexUnderlying?: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export default function DashboardContent({
   isLoadingSingleDate,
   singleDateQueryError,
   singleDateQuery,
+  isIndexUnderlying = false,
 }: DashboardContentProps) {
   const { sendErrorNotification } = useErrorNotification();
   const lastErrorRef = useRef<string | null>(null);
@@ -102,6 +104,7 @@ export default function DashboardContent({
             bullMatrix={singleDateMatrixData.bullMatrix}
             bearMatrix={singleDateMatrixData.bearMatrix}
             priceByDate={singleDateMatrixData.priceByDate}
+            isIndexUnderlying={isIndexUnderlying}
           />
         </div>
       );
@@ -152,6 +155,7 @@ export default function DashboardContent({
         bullMatrix={bullMatrix}
         bearMatrix={bearMatrix}
         priceByDate={priceByDate}
+        isIndexUnderlying={isIndexUnderlying}
       />
     );
   }

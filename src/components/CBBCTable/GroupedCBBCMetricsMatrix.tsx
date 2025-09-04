@@ -14,6 +14,7 @@ type Props = {
   bullMatrix: Record<string, Record<string, AggregatedCell>>;
   bearMatrix: Record<string, Record<string, AggregatedCell>>;
   priceByDate: Record<string, number>;
+  isIndexUnderlying?: boolean;
 };
 
 export default function CBBCMatrixTable({
@@ -24,6 +25,7 @@ export default function CBBCMatrixTable({
   bullMatrix,
   bearMatrix,
   priceByDate,
+  isIndexUnderlying = false,
 }: Props) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [showAllBearRanges, setShowAllBearRanges] = useState(false);
@@ -128,6 +130,7 @@ export default function CBBCMatrixTable({
                 prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bear`] || false}
                 onToggle={() => toggleRow(range, "Bear")}
+                isIndexUnderlying={isIndexUnderlying}
               />
             </Fragment>
           ))}
@@ -164,6 +167,7 @@ export default function CBBCMatrixTable({
                 prevDate={prevDate}
                 isExpanded={expandedRows[`${range}-Bull`] || false}
                 onToggle={() => toggleRow(range, "Bull")}
+                isIndexUnderlying={isIndexUnderlying}
               />
             </Fragment>
           ))}

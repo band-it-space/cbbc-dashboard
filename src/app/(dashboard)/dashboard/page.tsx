@@ -5,6 +5,7 @@ import CBBCDashboardStats from "@/components/CBBCDashboardStats";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useDashboardFilters } from "@/hooks/useDashboardFilters";
+import { formatUnderlyingCode } from "@/lib/utils";
 
 export default function DashboardPageV2() {
   // Use custom hooks for data and filter management
@@ -78,6 +79,14 @@ export default function DashboardPageV2() {
         isLoadingSingleDate={isLoadingSingleDate}
         singleDateQueryError={singleDateQuery.error}
         singleDateQuery={singleDateQuery}
+        isIndexUnderlying={(() => {
+          const code = filters.underlying;
+          if (!code) return false;
+          const found = underlyings.find(
+            (u) => formatUnderlyingCode(u.code) === code
+          );
+          return found?.type === "index";
+        })()}
       />
     </div>
   );

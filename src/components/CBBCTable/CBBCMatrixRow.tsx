@@ -37,6 +37,7 @@ type Props = {
   prevDate?: string;
   isExpanded: boolean;
   onToggle: (range: string) => void;
+  isIndexUnderlying?: boolean;
 };
 
 export default function CBBCMatrixRow({
@@ -47,6 +48,7 @@ export default function CBBCMatrixRow({
   prevDate,
   isExpanded,
   onToggle,
+  isIndexUnderlying = false,
 }: Props) {
   const cellForDate = (date: string) => matrix[range]?.[date];
 
@@ -122,7 +124,13 @@ export default function CBBCMatrixRow({
                   </td>
                   <td className="p-1 border border-gray-300 min-w-[100px] text-center bg-white">
                     <div className="flex items-center justify-center px-1 text-xs text-black font-semibold">
-                      {toAbbreviatedNumber(Math.round(cell.shares || 0))}
+                      {toAbbreviatedNumber(
+                        Math.round(
+                          (isIndexUnderlying
+                            ? (cell.shares || 0) / 50
+                            : cell.shares || 0) || 0
+                        )
+                      )}
                     </div>
                   </td>
                   <td className="p-1 text-center border border-gray-300 max-w-[200px] truncate bg-white">
